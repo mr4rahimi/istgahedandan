@@ -9,9 +9,8 @@ const nextConfig: NextConfig = {
       },
     ],
     localPatterns: [
-      {
-        pathname: "/uploads/**",
-      },
+      { pathname: "/uploads/**" },
+      { pathname: "/assets/**" },
     ],
   },
   async rewrites() {
