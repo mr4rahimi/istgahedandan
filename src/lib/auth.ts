@@ -1,8 +1,8 @@
-import jwt from "jsonwebtoken";
+import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 
-const JWT_SECRET = process.env.JWT_SECRET || "fallback-secret";
-const COOKIE_NAME = "admin_token";
+const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "istgah-dandan-admin-secret-2024");
+export const COOKIE_NAME = "admin_token";
 
 export interface AdminPayload {
   id: number;
@@ -10,13 +10,17 @@ export interface AdminPayload {
   name: string;
 }
 
-export function signToken(payload: AdminPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
+export async function signToken(payload: AdminPayload): Promise<string> {
+  return new SignJWT(payload as unknown as Record<string, unknown>)
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime("7d")
+    .sign(SECRET);
 }
 
-export function verifyToken(token: string): AdminPayload | null {
+export async function verifyToken(token: string): Promise<AdminPayload | null> {
   try {
-    return jwt.verify(token, JWT_SECRET) as AdminPayload;
+    const { payload } = await jwtVerify(token, SECRET);
+    return payload as unknown as AdminPayload;
   } catch {
     return null;
   }
@@ -28,5 +32,3 @@ export async function getAdminSession(): Promise<AdminPayload | null> {
   if (!token) return null;
   return verifyToken(token);
 }
-
-export { COOKIE_NAME };
