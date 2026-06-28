@@ -1,0 +1,188 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Dentist {
+  id              Int               @id @default(autoincrement())
+  slug            String            @unique
+  title           String
+  shortDesc       String?
+  longDesc        String?
+  address         String?
+  phones          String[]
+  socialLinks     Json?
+  workingHours    Json?
+  mapLat          Float?
+  mapLng          Float?
+  centerCode      String?
+  featuredImage   String?
+  gallery         String[]
+  videos          String[]
+  metaTitle       String?
+  metaDescription String?
+  status          DentistStatus     @default(PUBLISHED)
+  order           Int               @default(0)
+  locations       DentistLocation[]
+  reviews         Review[]
+  faqs            FAQ[]
+  wpPostId        Int?              @unique
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+}
+
+enum DentistStatus {
+  PUBLISHED
+  HIDDEN
+  PENDING
+}
+
+model Location {
+  id              Int               @id @default(autoincrement())
+  slug            String            @unique
+  title           String
+  shortDesc       String?
+  longDesc        String?
+  metaTitle       String?
+  metaDescription String?
+  parentId        Int?
+  parent          Location?         @relation("LocationHierarchy", fields: [parentId], references: [id])
+  children        Location[]        @relation("LocationHierarchy")
+  dentists        DentistLocation[]
+  faqs            FAQ[]
+  wpPostId        Int?              @unique
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+}
+
+model DentistLocation {
+  id         Int      @id @default(autoincrement())
+  dentistId  Int
+  locationId Int
+  order      Int      @default(0)
+  show       Boolean  @default(true)
+  dentist    Dentist  @relation(fields: [dentistId], references: [id], onDelete: Cascade)
+  location   Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@unique([dentistId, locationId])
+}
+
+model Service {
+  id              Int      @id @default(autoincrement())
+  slug            String   @unique
+  title           String
+  content         String?
+  shortDesc       String?
+  featuredImage   String?
+  metaTitle       String?
+  metaDescription String?
+  reviews         Review[]
+  faqs            FAQ[]
+  wpPostId        Int?     @unique
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model BlogPost {
+  id              Int       @id @default(autoincrement())
+  slug            String    @unique
+  title           String
+  content         String?
+  excerpt         String?
+  featuredImage   String?
+  categoryId      Int?
+  category        Category? @relation(fields: [categoryId], references: [id])
+  metaTitle       String?
+  metaDescription String?
+  publishedAt     DateTime?
+  wpPostId        Int?      @unique
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+}
+
+model Category {
+  id       Int        @id @default(autoincrement())
+  slug     String     @unique
+  name     String
+  parentId Int?
+  parent   Category?  @relation("CategoryHierarchy", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryHierarchy")
+  posts    BlogPost[]
+  wpTermId Int?       @unique
+}
+
+model StaticPage {
+  id              Int      @id @default(autoincrement())
+  slug            String   @unique
+  title           String
+  content         String?
+  metaTitle       String?
+  metaDescription String?
+  wpPostId        Int?     @unique
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Review {
+  id          Int      @id @default(autoincrement())
+  dentistId   Int?
+  serviceId   Int?
+  dentist     Dentist? @relation(fields: [dentistId], references: [id], onDelete: Cascade)
+  service     Service? @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  authorName  String
+  authorEmail String?
+  content     String
+  rating      Int?
+  approved    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  wpCommentId Int?     @unique
+}
+
+model FAQ {
+  id         Int       @id @default(autoincrement())
+  dentistId  Int?
+  locationId Int?
+  serviceId  Int?
+  dentist    Dentist?  @relation(fields: [dentistId], references: [id], onDelete: Cascade)
+  location   Location? @relation(fields: [locationId], references: [id], onDelete: Cascade)
+  service    Service?  @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+  question   String
+  answer     String
+  order      Int       @default(0)
+}
+
+model AdminUser {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+}
+
+model DentistRegistration {
+  id         Int                @id @default(autoincrement())
+  clinicName String
+  doctorName String?
+  phone      String
+  email      String?
+  address    String?
+  city       String?
+  message    String?
+  status     RegistrationStatus @default(PENDING)
+  createdAt  DateTime           @default(now())
+}
+
+enum RegistrationStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model Setting {
+  key   String @id
+  value String
+}

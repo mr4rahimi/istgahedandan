@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: "IRANSans";
+  src: url("/fonts/IRANSansWeb.woff2") format("woff2"),
+    url("/fonts/IRANSansWeb.woff") format("woff");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IRANSans";
+  src: url("/fonts/IRANSansWeb_Bold.woff2") format("woff2"),
+    url("/fonts/IRANSansWeb_Bold.woff") format("woff");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "IRANSans";
+  src: url("/fonts/IRANSansWeb_Medium.woff2") format("woff2"),
+    url("/fonts/IRANSansWeb_Medium.woff") format("woff");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --primary: #0071a1;
+  --primary-dark: #005580;
+  --secondary: #61ce70;
+  --text-dark: #1a1a2e;
+  --text-gray: #6b7280;
+  --bg-light: #f8fafc;
+}
+
+@theme inline {
+  --color-primary: var(--primary);
+  --color-primary-dark: var(--primary-dark);
+  --color-secondary: var(--secondary);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  direction: rtl;
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: "IRANSans", Tahoma, Arial, sans-serif;
+  background: #ffffff;
+  color: var(--text-dark);
+  line-height: 1.7;
+}
+
+/* Persian number normalization */
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+/* Smooth scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--primary);
+  border-radius: 3px;
+}
