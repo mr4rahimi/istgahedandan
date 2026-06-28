@@ -7,7 +7,7 @@ services:
       POSTGRES_PASSWORD: istgah_pass_2024
       POSTGRES_DB: istgahedandan
     ports:
-      - "5435:5432"
+      - "5436:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     restart: unless-stopped
