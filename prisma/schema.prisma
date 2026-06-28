@@ -14,14 +14,16 @@ model Dentist {
   longDesc        String?
   address         String?
   phones          String[]
+  whatsapp        String?
+  telegram        String?
+  instagram       String?
   socialLinks     Json?
-  workingHours    Json?
+  workingHours    String?
   mapLat          Float?
   mapLng          Float?
   centerCode      String?
   featuredImage   String?
   gallery         String[]
-  videos          String[]
   metaTitle       String?
   metaDescription String?
   status          DentistStatus     @default(PUBLISHED)
@@ -29,9 +31,40 @@ model Dentist {
   locations       DentistLocation[]
   reviews         Review[]
   faqs            FAQ[]
+  stories         DentistStory[]
+  dentistVideos   DentistVideo[]
+  services        DentistService[]
   wpPostId        Int?              @unique
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
+}
+
+model DentistStory {
+  id        Int      @id @default(autoincrement())
+  dentistId Int
+  dentist   Dentist  @relation(fields: [dentistId], references: [id], onDelete: Cascade)
+  imageUrl  String
+  title     String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+}
+
+model DentistVideo {
+  id        Int     @id @default(autoincrement())
+  dentistId Int
+  dentist   Dentist @relation(fields: [dentistId], references: [id], onDelete: Cascade)
+  url       String
+  title     String
+  order     Int     @default(0)
+}
+
+model DentistService {
+  dentistId Int
+  serviceId Int
+  dentist   Dentist @relation(fields: [dentistId], references: [id], onDelete: Cascade)
+  service   Service @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+
+  @@id([dentistId, serviceId])
 }
 
 enum DentistStatus {
@@ -71,8 +104,8 @@ model DentistLocation {
 }
 
 model Service {
-  id              Int      @id @default(autoincrement())
-  slug            String   @unique
+  id              Int              @id @default(autoincrement())
+  slug            String           @unique
   title           String
   content         String?
   shortDesc       String?
@@ -81,9 +114,10 @@ model Service {
   metaDescription String?
   reviews         Review[]
   faqs            FAQ[]
-  wpPostId        Int?     @unique
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  dentists        DentistService[]
+  wpPostId        Int?             @unique
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
 }
 
 model BlogPost {

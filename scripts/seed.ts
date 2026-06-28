@@ -168,7 +168,6 @@ async function main() {
         centerCode: d.center_code || null,
         featuredImage: d.featured_image || null,
         gallery: d.gallery || [],
-        videos: d.videos || [],
         metaTitle: d.meta_title || null,
         metaDescription: d.meta_description || null,
         status: DentistStatus.PUBLISHED,
