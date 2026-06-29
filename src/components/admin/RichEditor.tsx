@@ -14,6 +14,13 @@ interface Props {
   minHeight?: number;
 }
 
+// Defined outside to keep stable references — prevents Tiptap duplicate-extension warning in Strict Mode
+const EXTENSIONS = [
+  StarterKit,
+  Underline,
+  LinkExt.configure({ openOnClick: false, HTMLAttributes: { target: "_blank", rel: "noopener noreferrer" } }),
+];
+
 const SEP = () => <div style={{ width: 1, height: 22, background: "#e0eaed", margin: "0 2px", flexShrink: 0 }} />;
 
 function TBtn({ active, onClick, title, children }: { active?: boolean; onClick: () => void; title: string; children: React.ReactNode }) {
@@ -32,9 +39,7 @@ export default function RichEditor({ value, onChange, placeholder = "محتوا 
 
   const editor = useEditor({
     extensions: [
-      StarterKit,
-      Underline,
-      LinkExt.configure({ openOnClick: false, HTMLAttributes: { target: "_blank", rel: "noopener noreferrer" } }),
+      ...EXTENSIONS,
       Placeholder.configure({ placeholder }),
     ],
     content: initial.current,

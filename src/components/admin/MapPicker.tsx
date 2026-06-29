@@ -19,9 +19,14 @@ export default function MapPicker({ lat, lng, onChange }: Props) {
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
 
-    let L: typeof import("leaflet");
+    let cancelled = false;
     import("leaflet").then(mod => {
-      L = mod.default ?? mod;
+      if (cancelled || !containerRef.current) return;
+      // Guard against React Strict Mode double-init
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((containerRef.current as any)._leaflet_id != null) return;
+
+      const L = mod.default ?? mod;
 
       // Fix default icon paths
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -65,6 +70,7 @@ export default function MapPicker({ lat, lng, onChange }: Props) {
     });
 
     return () => {
+      cancelled = true;
       mapRef.current?.remove();
       mapRef.current = null;
       markerRef.current = null;
