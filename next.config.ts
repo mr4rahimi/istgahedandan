@@ -17,8 +17,6 @@ const nextConfig: NextConfig = {
     return [
       { source: "/wp-content/uploads/:path*", destination: "/uploads/:path*" },
       // Persian-named routes — Next.js 16 doesn't reliably match Unicode directory names
-      { source: "/مقالات", destination: "/articles" },
-      { source: "/مقالات/:path*", destination: "/articles/:path*" },
       { source: "/جستجو", destination: "/search" },
       { source: "/جستجو/:path*", destination: "/search/:path*" },
       { source: "/خدمات", destination: "/services-list" },
