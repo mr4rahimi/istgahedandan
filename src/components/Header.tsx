@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
+import LiveSearch from "@/components/LiveSearch";
 
 const NAV_LINKS = [
   { key: "home", label: "ایستگاه دندان", href: "/" },
@@ -21,8 +22,6 @@ export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
-  const [searchQ, setSearchQ] = useState("");
-  const searchRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const mq = window.matchMedia("(max-width: 880px)");
@@ -39,22 +38,9 @@ export default function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  useEffect(() => {
-    if (searchOpen && searchRef.current) searchRef.current.focus();
-  }, [searchOpen]);
-
   const barStyle: React.CSSProperties = scrolled
     ? { background: "rgba(255,255,255,.78)", backdropFilter: "blur(16px)", WebkitBackdropFilter: "blur(16px)", boxShadow: "0 8px 30px -12px rgba(17,75,107,.28)", borderBottom: "1px solid rgba(255,255,255,.4)", transition: "all .28s ease" }
     : { background: "#ffffff", boxShadow: "0 1px 0 #e9f1f4", transition: "all .28s ease" };
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQ.trim()) {
-      router.push(`/جستجو?q=${encodeURIComponent(searchQ.trim())}`);
-      setSearchOpen(false);
-      setSearchQ("");
-    }
-  };
 
   return (
     <header style={{ position: "sticky", top: 0, zIndex: 1200, direction: "rtl", fontFamily: "inherit" }}>
@@ -107,14 +93,15 @@ export default function Header() {
         </div>
 
         {searchOpen && (
-          <div style={{ borderTop: "1px solid #e9f1f4", background: "rgba(255,255,255,.96)", backdropFilter: "blur(8px)", animation: "ih-search-in .2s ease" }}>
-            <form onSubmit={handleSearch} style={{ maxWidth: 1280, margin: "0 auto", padding: "14px 20px", display: "flex", gap: 10 }}>
-              <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 10, background: "#f1f8fa", border: "1px solid #dceaef", borderRadius: 14, padding: "12px 16px" }}>
-                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0c8aa6" strokeWidth="2.2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-                <input ref={searchRef} value={searchQ} onChange={e => setSearchQ(e.target.value)} placeholder="جستجوی دندانپزشک، خدمات یا منطقه…" style={{ flex: 1, border: "none", outline: "none", background: "transparent", fontFamily: "inherit", fontSize: 15, color: "#133b48" }} />
-              </div>
-              <button type="button" onClick={() => setSearchOpen(false)} style={{ border: "none", background: "#133b48", color: "#fff", fontFamily: "inherit", fontWeight: 600, fontSize: 14, padding: "0 18px", borderRadius: 14, cursor: "pointer" }}>بستن</button>
-            </form>
+          <div style={{ borderTop: "1px solid #e9f1f4", background: "rgba(255,255,255,.97)", backdropFilter: "blur(8px)", animation: "ih-search-in .2s ease" }}>
+            <div style={{ maxWidth: 1280, margin: "0 auto", padding: "14px 20px", display: "flex", gap: 10, alignItems: "center" }}>
+              <LiveSearch
+                placeholder="جستجوی دندانپزشک، خدمات یا منطقه…"
+                autoFocus
+                onNavigate={() => setSearchOpen(false)}
+              />
+              <button type="button" onClick={() => setSearchOpen(false)} style={{ border: "none", background: "#f1f6f8", color: "#2a4f5b", fontFamily: "inherit", fontWeight: 600, fontSize: 14, padding: "0 16px", borderRadius: 12, cursor: "pointer", height: 46, flexShrink: 0 }}>بستن</button>
+            </div>
           </div>
         )}
       </div>

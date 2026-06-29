@@ -41,6 +41,14 @@ img { max-width: 100%; display: block; }
   to { opacity: 1; transform: translateY(0); }
 }
 
+/* LiveSearch animations */
+@keyframes ls-spin { to { transform: rotate(360deg); } }
+@keyframes ls-pulse { 0%,100% { opacity: 1; } 50% { opacity: .45; } }
+@keyframes ls-progress {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
 /* Leaflet fix */
 .leaflet-container { font-family: inherit !important; }
 .leaflet-default-icon-path { background-image: none; }
