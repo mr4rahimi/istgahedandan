@@ -10,14 +10,23 @@ interface Props {
 
 export default function DentistMap({ lat, lng, title }: Props) {
   const ref = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<import("leaflet").Map | null>(null);
 
   useEffect(() => {
     if (!ref.current) return;
+
     import("leaflet").then(L => {
-      import("leaflet/dist/leaflet.css");
       if (!ref.current) return;
-      ref.current.innerHTML = "";
+
+      // Destroy previous instance if any (Strict Mode / hot reload)
+      if (mapRef.current) {
+        mapRef.current.remove();
+        mapRef.current = null;
+      }
+
       const map = L.map(ref.current).setView([lat, lng], 15);
+      mapRef.current = map;
+
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
         attribution: "© OpenStreetMap",
       }).addTo(map);
@@ -33,6 +42,11 @@ export default function DentistMap({ lat, lng, title }: Props) {
 
       L.marker([lat, lng], { icon }).addTo(map).bindPopup(title).openPopup();
     });
+
+    return () => {
+      mapRef.current?.remove();
+      mapRef.current = null;
+    };
   }, [lat, lng, title]);
 
   return (
