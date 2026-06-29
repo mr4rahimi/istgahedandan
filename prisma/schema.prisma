@@ -8,6 +8,7 @@ datasource db {
 
 model Dentist {
   id              Int               @id @default(autoincrement())
+  user            DentistUser?
   slug            String            @unique
   title           String
   shortDesc       String?
@@ -127,22 +128,25 @@ model Service {
 }
 
 model BlogPost {
-  id              Int       @id @default(autoincrement())
-  slug            String    @unique
-  title           String
-  content         String?
-  excerpt         String?
-  featuredImage   String?
-  categoryId      Int?
-  category        Category? @relation(fields: [categoryId], references: [id])
-  metaTitle       String?
-  metaDescription String?
-  publishedAt     DateTime?
-  isFeatured      Boolean   @default(false)
-  authorName      String?
-  wpPostId        Int?      @unique
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  id                     Int          @id @default(autoincrement())
+  slug                   String       @unique
+  title                  String
+  content                String?
+  excerpt                String?
+  featuredImage          String?
+  categoryId             Int?
+  category               Category?    @relation(fields: [categoryId], references: [id])
+  metaTitle              String?
+  metaDescription        String?
+  publishedAt            DateTime?
+  isFeatured             Boolean      @default(false)
+  authorName             String?
+  authorId               Int?
+  author                 DentistUser? @relation(fields: [authorId], references: [id])
+  externalLinksApproved  Boolean      @default(false)
+  wpPostId               Int?         @unique
+  createdAt              DateTime     @default(now())
+  updatedAt              DateTime     @updatedAt
 }
 
 model Category {
@@ -205,6 +209,26 @@ model AdminUser {
   password  String
   name      String
   createdAt DateTime @default(now())
+}
+
+model DentistUser {
+  id        Int              @id @default(autoincrement())
+  email     String           @unique
+  password  String
+  name      String
+  phone     String?
+  status    DentistUserStatus @default(PENDING)
+  dentistId Int?             @unique
+  dentist   Dentist?         @relation(fields: [dentistId], references: [id])
+  posts     BlogPost[]
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+}
+
+enum DentistUserStatus {
+  PENDING
+  ACTIVE
+  SUSPENDED
 }
 
 model DentistRegistration {

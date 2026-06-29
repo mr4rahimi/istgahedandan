@@ -71,7 +71,7 @@ export default function DentistMap() {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const clusterGroup = (L as any).markerClusterGroup({
         maxClusterRadius: 60,
-        iconCreateFunction: (cluster: import("leaflet.markercluster").MarkerCluster) => {
+        iconCreateFunction: (cluster: any) => {
           const count = cluster.getChildCount();
           return L.divIcon({
             className: "",
