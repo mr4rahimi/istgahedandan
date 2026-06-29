@@ -149,7 +149,7 @@ export default async function HomePage() {
               <span style={{ color: "#0c8aa6", fontWeight: 700, fontSize: 14 }}>بلاگ سلامت دهان</span>
               <h2 style={{ margin: "4px 0 0", fontSize: "clamp(22px,3vw,30px)", fontWeight: 800, color: "#133b48" }}>آخرین مقالات</h2>
             </div>
-            <Link href="/مقالات" style={{ color: "#0c8aa6", textDecoration: "none", fontWeight: 600, fontSize: 14, whiteSpace: "nowrap" }}>همه مقالات ←</Link>
+            <Link href="/mag" style={{ color: "#0c8aa6", textDecoration: "none", fontWeight: 600, fontSize: 14, whiteSpace: "nowrap" }}>همه مقالات ←</Link>
           </div>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 20 }}>
             {articles.map((a, i) => (

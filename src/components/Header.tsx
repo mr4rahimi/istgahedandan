@@ -9,7 +9,7 @@ const NAV_LINKS = [
   { key: "home", label: "ایستگاه دندان", href: "/" },
   { key: "services", label: "خدمات", href: "/خدمات" },
   { key: "dentists", label: "لیست دندانپزشکی‌ها", href: "/دندانپزشکان" },
-  { key: "blog", label: "مقالات", href: "/مقالات" },
+  { key: "blog", label: "مقالات", href: "/mag" },
   { key: "about", label: "درباره ما", href: "/درباره-ما" },
   { key: "contact", label: "تماس با ما", href: "/تماس-با-ما" },
 ];

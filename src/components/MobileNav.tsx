@@ -22,7 +22,7 @@ export default function MobileNav() {
   const active = pathname === "/" ? "home"
     : pathname.startsWith("/خدمات") ? "services"
     : pathname.startsWith("/دندانپزشکان") ? "dentists"
-    : pathname.startsWith("/مقالات") ? "blog"
+    : pathname.startsWith("/mag") ? "blog"
     : "";
 
   const mk = (key: string) => ({

@@ -67,9 +67,9 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
       {/* Category Chips */}
       <section style={{ maxWidth: 1280, margin: "0 auto", padding: "22px 16px 6px" }}>
         <div className="ih-hide-scroll" style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 6 }}>
-          <Link href="/مقالات" style={{ border: catFilter === undefined ? "none" : "1px solid #d2e8ee", background: catFilter === undefined ? "linear-gradient(135deg,#15b8d1,#0a6f9e)" : "#fff", color: catFilter === undefined ? "#fff" : "#2a4f5b", textDecoration: "none", fontWeight: 600, fontSize: 14, padding: "9px 18px", borderRadius: 30, whiteSpace: "nowrap", flexShrink: 0 }}>همه</Link>
+          <Link href="/mag" style={{ border: catFilter === undefined ? "none" : "1px solid #d2e8ee", background: catFilter === undefined ? "linear-gradient(135deg,#15b8d1,#0a6f9e)" : "#fff", color: catFilter === undefined ? "#fff" : "#2a4f5b", textDecoration: "none", fontWeight: 600, fontSize: 14, padding: "9px 18px", borderRadius: 30, whiteSpace: "nowrap", flexShrink: 0 }}>همه</Link>
           {categories.map(cat => (
-            <Link key={cat.id} href={`/مقالات?cat=${cat.id}`} style={{ border: catFilter === cat.id ? "none" : "1px solid #d2e8ee", background: catFilter === cat.id ? "linear-gradient(135deg,#15b8d1,#0a6f9e)" : "#fff", color: catFilter === cat.id ? "#fff" : "#2a4f5b", textDecoration: "none", fontWeight: 600, fontSize: 14, padding: "9px 18px", borderRadius: 30, whiteSpace: "nowrap", flexShrink: 0 }}>{cat.name}</Link>
+            <Link key={cat.id} href={`/mag?cat=${cat.id}`} style={{ border: catFilter === cat.id ? "none" : "1px solid #d2e8ee", background: catFilter === cat.id ? "linear-gradient(135deg,#15b8d1,#0a6f9e)" : "#fff", color: catFilter === cat.id ? "#fff" : "#2a4f5b", textDecoration: "none", fontWeight: 600, fontSize: 14, padding: "9px 18px", borderRadius: 30, whiteSpace: "nowrap", flexShrink: 0 }}>{cat.name}</Link>
           ))}
         </div>
       </section>
@@ -132,20 +132,20 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
         <section style={{ maxWidth: 1280, margin: "0 auto", padding: "16px 16px 46px" }}>
           <div style={{ display: "flex", justifyContent: "center", gap: 8, flexWrap: "wrap" }}>
             {page > 1 && (
-              <Link href={`/مقالات?page=${page - 1}${catFilter ? `&cat=${catFilter}` : ""}`} style={{ width: 42, height: 42, border: "1px solid #d7e6ea", background: "#fff", borderRadius: 12, display: "grid", placeItems: "center", textDecoration: "none", color: "#2a4f5b" }}>
+              <Link href={`/mag?page=${page - 1}${catFilter ? `&cat=${catFilter}` : ""}`} style={{ width: 42, height: 42, border: "1px solid #d7e6ea", background: "#fff", borderRadius: 12, display: "grid", placeItems: "center", textDecoration: "none", color: "#2a4f5b" }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><polyline points="9 6 15 12 9 18" /></svg>
               </Link>
             )}
             {Array.from({ length: Math.min(5, totalPages) }, (_, idx) => {
               const p = idx + 1;
               return (
-                <Link key={p} href={`/مقالات?page=${p}${catFilter ? `&cat=${catFilter}` : ""}`} style={{ width: 42, height: 42, border: p === page ? "none" : "1px solid #d7e6ea", background: p === page ? "linear-gradient(135deg,#15b8d1,#0a6f9e)" : "#fff", color: p === page ? "#fff" : "#2a4f5b", borderRadius: 12, display: "grid", placeItems: "center", textDecoration: "none", fontWeight: 700 }}>
+                <Link key={p} href={`/mag?page=${p}${catFilter ? `&cat=${catFilter}` : ""}`} style={{ width: 42, height: 42, border: p === page ? "none" : "1px solid #d7e6ea", background: p === page ? "linear-gradient(135deg,#15b8d1,#0a6f9e)" : "#fff", color: p === page ? "#fff" : "#2a4f5b", borderRadius: 12, display: "grid", placeItems: "center", textDecoration: "none", fontWeight: 700 }}>
                   {p}
                 </Link>
               );
             })}
             {page < totalPages && (
-              <Link href={`/مقالات?page=${page + 1}${catFilter ? `&cat=${catFilter}` : ""}`} style={{ width: 42, height: 42, border: "1px solid #d7e6ea", background: "#fff", borderRadius: 12, display: "grid", placeItems: "center", textDecoration: "none", color: "#2a4f5b" }}>
+              <Link href={`/mag?page=${page + 1}${catFilter ? `&cat=${catFilter}` : ""}`} style={{ width: 42, height: 42, border: "1px solid #d7e6ea", background: "#fff", borderRadius: 12, display: "grid", placeItems: "center", textDecoration: "none", color: "#2a4f5b" }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><polyline points="15 6 9 12 15 18" /></svg>
               </Link>
             )}

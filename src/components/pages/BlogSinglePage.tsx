@@ -47,7 +47,7 @@ export default async function BlogSinglePage({ slug }: { slug: string }) {
             <nav style={{ fontSize: 13, color: "#b9d4dc", marginBottom: 16 }}>
               <Link href="/" style={{ color: "#b9d4dc", textDecoration: "none" }}>خانه</Link>
               {" › "}
-              <Link href="/مقالات" style={{ color: "#b9d4dc", textDecoration: "none" }}>مقالات</Link>
+              <Link href="/mag" style={{ color: "#b9d4dc", textDecoration: "none" }}>مقالات</Link>
               {post.category && <>{" › "}{post.category.name}</>}
             </nav>
             {post.category && (
