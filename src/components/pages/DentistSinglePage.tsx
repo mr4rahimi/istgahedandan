@@ -80,7 +80,7 @@ export default async function DentistSinglePage({ slug }: { slug: string }) {
 
           {/* Avatar + buttons row */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-            <span style={{ width: 150, height: 150, borderRadius: 32, background: gradientFromId(dentist.id), border: "5px solid #f4f9fb", display: "grid", placeItems: "center", color: "#fff", fontWeight: 800, fontSize: 56, boxShadow: "0 14px 30px -12px rgba(13,120,168,.6)", flexShrink: 0, marginTop: -75 }}>
+            <span style={{ width: 150, height: 150, borderRadius: 32, background: gradientFromId(dentist.id), border: "5px solid #f4f9fb", display: "grid", placeItems: "center", color: "#fff", fontWeight: 800, fontSize: 56, boxShadow: "0 14px 30px -12px rgba(13,120,168,.6)", flexShrink: 0, marginTop: -75, position: "relative", zIndex: 10 }}>
               {initial}
             </span>
             <div style={{ display: "flex", gap: 10, paddingTop: 20 }}>
