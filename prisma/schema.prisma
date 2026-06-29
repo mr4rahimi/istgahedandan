@@ -114,6 +114,10 @@ model Service {
   featuredImage   String?
   metaTitle       String?
   metaDescription String?
+  bgGradient      String?
+  iconSvgPath     String?
+  order           Int              @default(0)
+  infoItems       Json?
   reviews         Review[]
   faqs            FAQ[]
   dentists        DentistService[]
