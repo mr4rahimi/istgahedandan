@@ -11,7 +11,7 @@ const NAV_LINKS = [
   { key: "dentists", label: "لیست دندانپزشکی‌ها", href: "/dentists-list" },
   { key: "blog", label: "مقالات", href: "/mag" },
   { key: "about", label: "درباره ما", href: "/درباره-ما" },
-  { key: "contact", label: "تماس با ما", href: "/تماس-با-ما" },
+  { key: "contact", label: "تماس با ما", href: "/contact" },
 ];
 
 export default function Header() {

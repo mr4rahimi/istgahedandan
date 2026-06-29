@@ -83,7 +83,7 @@ export default async function ServicesPage() {
             <h3 style={{ margin: "0 0 8px", fontSize: "clamp(20px,2.6vw,28px)", fontWeight: 800 }}>نمی‌دانید کدام خدمت مناسب شماست؟</h3>
             <p style={{ margin: 0, fontSize: 15, color: "rgba(255,255,255,.9)" }}>با متخصصان ما مشاوره رایگان بگیرید و بهترین درمان را انتخاب کنید.</p>
           </div>
-          <Link href="/تماس-با-ما" style={{ background: "#fff", color: "#0b5e7a", textDecoration: "none", fontWeight: 700, fontSize: 15, padding: "14px 30px", borderRadius: 13, whiteSpace: "nowrap" }}>دریافت مشاوره رایگان</Link>
+          <Link href="/contact" style={{ background: "#fff", color: "#0b5e7a", textDecoration: "none", fontWeight: 700, fontSize: 15, padding: "14px 30px", borderRadius: 13, whiteSpace: "nowrap" }}>دریافت مشاوره رایگان</Link>
         </div>
       </section>
 
