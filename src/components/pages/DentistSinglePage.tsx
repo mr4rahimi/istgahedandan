@@ -30,13 +30,47 @@ export default async function DentistSinglePage({ slug }: { slug: string }) {
   const locationIds = dentistLocs.map(l => l.locationId);
   const serviceIds = dentistSvcs.map(s => s.serviceId);
   const [locationsData, servicesData] = await Promise.all([
-    locationIds.length > 0 ? prisma.location.findMany({ where: { id: { in: locationIds } }, select: { id: true, slug: true, title: true } }) : [],
+    locationIds.length > 0 ? prisma.location.findMany({ where: { id: { in: locationIds } }, select: { id: true, slug: true, title: true, shortTitle: true, parentId: true } }) : [],
     serviceIds.length > 0 ? prisma.service.findMany({ where: { id: { in: serviceIds } }, select: { id: true, slug: true, title: true } }) : [],
   ]);
 
+  // Build ancestor chain for breadcrumbs
+  const allAncestorIds = new Set<number>();
+  for (const loc of locationsData) { if (loc.parentId) allAncestorIds.add(loc.parentId); }
+  let ancestorsData: { id: number; slug: string; shortTitle: string | null; title: string; parentId: number | null }[] = [];
+  if (allAncestorIds.size > 0) {
+    ancestorsData = await prisma.location.findMany({
+      where: { id: { in: [...allAncestorIds] } },
+      select: { id: true, slug: true, shortTitle: true, title: true, parentId: true },
+    });
+    // one more level up (grandparent)
+    const grandParentIds = ancestorsData.map(a => a.parentId).filter(Boolean) as number[];
+    if (grandParentIds.length > 0) {
+      const grandParents = await prisma.location.findMany({
+        where: { id: { in: grandParentIds } },
+        select: { id: true, slug: true, shortTitle: true, title: true, parentId: true },
+      });
+      ancestorsData = [...ancestorsData, ...grandParents];
+    }
+  }
+  const ancestorMap = new Map(ancestorsData.map(a => [a.id, a]));
+
+  function buildBreadcrumb(locId: number): { id: number; slug: string; label: string }[] {
+    const loc = locationsData.find(l => l.id === locId) ?? ancestorMap.get(locId);
+    if (!loc) return [];
+    const chain: { id: number; slug: string; label: string }[] = [];
+    let current: typeof ancestorsData[number] | typeof locationsData[number] | undefined = loc;
+    while (current) {
+      chain.unshift({ id: current.id, slug: current.slug, label: current.shortTitle || current.title });
+      current = current.parentId ? ancestorMap.get(current.parentId) : undefined;
+    }
+    return chain;
+  }
+
   const locationLinks = dentistLocs.map(dl => ({
     locationId: dl.locationId,
-    location: locationsData.find(l => l.id === dl.locationId) ?? { slug: "", title: "" },
+    location: locationsData.find(l => l.id === dl.locationId) ?? { slug: "", title: "", shortTitle: null },
+    breadcrumb: buildBreadcrumb(dl.locationId),
   }));
   const serviceLinks = dentistSvcs.map(ds => ({
     serviceId: ds.serviceId,
@@ -116,13 +150,13 @@ export default async function DentistSinglePage({ slug }: { slug: string }) {
 
             {/* Breadcrumbs + rating */}
             <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 10, flexWrap: "wrap" }}>
-              {/* Breadcrumbs */}
+              {/* Breadcrumbs — full ancestor chain */}
               <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 13.5, flexWrap: "wrap" }}>
-                <Link href="/دندانپزشکان" style={{ color: "#0c8aa6", textDecoration: "none", fontWeight: 600 }}>دندانپزشکان</Link>
-                {locationLinks.map(dl => (
-                  <span key={dl.locationId} style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                <Link href="/dentists-list" style={{ color: "#0c8aa6", textDecoration: "none", fontWeight: 600 }}>دندانپزشکان</Link>
+                {locationLinks[0]?.breadcrumb.map(crumb => (
+                  <span key={crumb.id} style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9bb6bf" strokeWidth="2.5" strokeLinecap="round"><polyline points="9 18 15 12 9 6" /></svg>
-                    <Link href={`/${dl.location.slug}`} style={{ color: "#0c8aa6", textDecoration: "none", fontWeight: 600 }}>{dl.location.title}</Link>
+                    <Link href={`/${crumb.slug}`} style={{ color: "#0c8aa6", textDecoration: "none", fontWeight: 600 }}>{crumb.label}</Link>
                   </span>
                 ))}
               </div>

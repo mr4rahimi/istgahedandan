@@ -77,11 +77,13 @@ model Location {
   id              Int               @id @default(autoincrement())
   slug            String            @unique
   title           String
+  shortTitle      String?
   shortDesc       String?
   longDesc        String?
   metaTitle       String?
   metaDescription String?
   parentId        Int?
+  order           Int               @default(0)
   parent          Location?         @relation("LocationHierarchy", fields: [parentId], references: [id])
   children        Location[]        @relation("LocationHierarchy")
   dentists        DentistLocation[]
