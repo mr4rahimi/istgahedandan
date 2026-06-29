@@ -21,8 +21,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { id } = await params;
   const body = await req.json() as Record<string, unknown>;
   const data: Record<string, unknown> = {};
-  const fields = ["title", "slug", "shortDesc", "content", "featuredImage", "bgGradient", "iconSvgPath", "order", "infoItems", "metaTitle", "metaDescription"];
+  const fields = ["title", "slug", "shortDesc", "content", "featuredImage", "bgGradient", "iconSvgPath", "order", "metaTitle", "metaDescription"];
   for (const f of fields) if (f in body) data[f] = body[f] ?? null;
+  if ("infoItems" in body) data.infoItems = body.infoItems ?? undefined;
 
   const service = await prisma.service.update({ where: { id: parseInt(id) }, data });
   return NextResponse.json(service);

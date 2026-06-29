@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
       bgGradient: (body.bgGradient as string) || null,
       iconSvgPath: (body.iconSvgPath as string) || null,
       order: (body.order as number) || 0,
-      infoItems: body.infoItems || null,
+      infoItems: body.infoItems ?? undefined,
       metaTitle: (body.metaTitle as string) || null,
       metaDescription: (body.metaDescription as string) || null,
     },
