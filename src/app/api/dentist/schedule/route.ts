@@ -10,13 +10,23 @@ export async function GET(req: NextRequest) {
 
   const { searchParams } = new URL(req.url);
   const date = searchParams.get("date");
-  const month = searchParams.get("month"); // YYYY-MM
+  const month = searchParams.get("month"); // YYYY-MM (legacy)
+  const from = searchParams.get("from"); // YYYY-MM-DD
+  const to = searchParams.get("to");     // YYYY-MM-DD
 
   if (date) {
     const schedule = await prisma.dentistSchedule.findUnique({
       where: { dentistId_date: { dentistId: session.dentistId, date } },
     });
     return NextResponse.json(schedule ?? { dentistId: session.dentistId, date, slots: [], slotDuration: 30 });
+  }
+
+  if (from && to) {
+    const schedules = await prisma.dentistSchedule.findMany({
+      where: { dentistId: session.dentistId, date: { gte: from, lte: to } },
+      orderBy: { date: "asc" },
+    });
+    return NextResponse.json(schedules);
   }
 
   if (month) {
@@ -27,7 +37,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json(schedules);
   }
 
-  return NextResponse.json({ error: "date یا month لازم است" }, { status: 400 });
+  return NextResponse.json({ error: "date, from+to, یا month لازم است" }, { status: 400 });
 }
 
 // PUT /api/dentist/schedule  — upsert schedule for a date

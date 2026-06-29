@@ -111,22 +111,29 @@ export default function ScheduleManager({ dentistId }: { dentistId: number }) {
   const [qfEnd, setQfEnd] = useState("14:00");
   const [qfDuration, setQfDuration] = useState(30);
 
-  const gregMonthStr = useCallback(() => {
-    const [gy, gm] = jalaliToGreg(jYear, jMonth, 1);
-    return `${gy}-${String(gm).padStart(2, "0")}`;
+  // Jalali month may span two Gregorian months — use date range instead of prefix
+  const jMonthRange = useCallback(() => {
+    const [fy, fm, fd] = jalaliToGreg(jYear, jMonth, 1);
+    const lastDay = jDaysInMonth(jYear, jMonth);
+    const [ly, lm, ld] = jalaliToGreg(jYear, jMonth, lastDay);
+    return {
+      from: `${fy}-${String(fm).padStart(2,"0")}-${String(fd).padStart(2,"0")}`,
+      to: `${ly}-${String(lm).padStart(2,"0")}-${String(ld).padStart(2,"0")}`,
+    };
   }, [jYear, jMonth]);
 
   // Load month schedules (for dot indicators)
   useEffect(() => {
     const fetchMonth = async () => {
-      const res = await fetch(`/api/dentist/schedule?month=${gregMonthStr()}`);
+      const { from, to } = jMonthRange();
+      const res = await fetch(`/api/dentist/schedule?from=${from}&to=${to}`);
       const data: Array<{ date: string; slots: string[] }> = await res.json();
       const map: Record<string, string[]> = {};
       data.forEach(s => { map[s.date] = s.slots; });
       setMonthSchedules(map);
     };
     fetchMonth();
-  }, [gregMonthStr]);
+  }, [jMonthRange]);
 
   // Load selected day
   useEffect(() => {
