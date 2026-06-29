@@ -35,6 +35,8 @@ model Dentist {
   stories         DentistStory[]
   dentistVideos   DentistVideo[]
   services        DentistService[]
+  schedules       DentistSchedule[]
+  appointments    Appointment[]
   wpPostId        Int?              @unique
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
@@ -253,4 +255,35 @@ enum RegistrationStatus {
 model Setting {
   key   String @id
   value String
+}
+
+model DentistSchedule {
+  id           Int      @id @default(autoincrement())
+  dentistId    Int
+  dentist      Dentist  @relation(fields: [dentistId], references: [id], onDelete: Cascade)
+  date         String   // YYYY-MM-DD (Gregorian)
+  slots        Json     // string[] — available time strings like ["09:00","09:30"]
+  slotDuration Int      @default(30)
+
+  @@unique([dentistId, date])
+}
+
+model Appointment {
+  id           Int               @id @default(autoincrement())
+  dentistId    Int
+  dentist      Dentist           @relation(fields: [dentistId], references: [id])
+  date         String            // YYYY-MM-DD
+  time         String            // HH:mm
+  patientName  String
+  patientPhone String
+  notes        String?
+  status       AppointmentStatus @default(CONFIRMED)
+  trackCode    String            @unique
+  isRead       Boolean           @default(false)
+  createdAt    DateTime          @default(now())
+}
+
+enum AppointmentStatus {
+  CONFIRMED
+  CANCELLED
 }
