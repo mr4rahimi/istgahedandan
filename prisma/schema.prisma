@@ -134,6 +134,8 @@ model BlogPost {
   metaTitle       String?
   metaDescription String?
   publishedAt     DateTime?
+  isFeatured      Boolean   @default(false)
+  authorName      String?
   wpPostId        Int?      @unique
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt

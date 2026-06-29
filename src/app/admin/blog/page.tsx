@@ -2,6 +2,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { toJalali } from "@/lib/utils";
 import type { Metadata } from "next";
+import { DeletePostBtn, FeaturedToggle } from "./BlogListActions";
 
 export const metadata: Metadata = { title: "مقالات | ادمین" };
 
@@ -19,8 +20,8 @@ export default async function AdminBlogPage({ searchParams }: { searchParams: Pr
       where,
       take: PAGE_SIZE,
       skip: (page - 1) * PAGE_SIZE,
-      orderBy: { createdAt: "desc" },
-      include: { category: { select: { name: true } } },
+      orderBy: [{ isFeatured: "desc" }, { publishedAt: "desc" }, { createdAt: "desc" }],
+      select: { id: true, title: true, slug: true, isFeatured: true, publishedAt: true, category: { select: { name: true } } },
     }),
   ]);
   const totalPages = Math.ceil(total / PAGE_SIZE);
@@ -31,6 +32,7 @@ export default async function AdminBlogPage({ searchParams }: { searchParams: Pr
         <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800, color: "#133b48" }}>مقالات</h1>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
           <span style={{ fontSize: 14, color: "#6c8b95" }}>{total} مقاله</span>
+          <Link href="/admin/blog/categories" style={{ color: "#0c8aa6", textDecoration: "none", fontWeight: 600, fontSize: 14, padding: "9px 18px", border: "1px solid #d7eef5", borderRadius: 11 }}>دسته‌بندی‌ها</Link>
           <Link href="/admin/blog/new" style={{ background: "linear-gradient(135deg,#15b8d1,#0a6f9e)", color: "#fff", textDecoration: "none", fontWeight: 700, fontSize: 14, padding: "9px 18px", borderRadius: 11 }}>+ مقاله جدید</Link>
         </div>
       </div>
@@ -45,6 +47,7 @@ export default async function AdminBlogPage({ searchParams }: { searchParams: Pr
           <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 14 }}>
             <thead>
               <tr style={{ background: "#f8fbfc", borderBottom: "1px solid #e7f0f3" }}>
+                <th style={{ padding: "13px 10px", textAlign: "center", fontWeight: 700, color: "#6c8b95", width: 36 }}>⭐</th>
                 <th style={{ padding: "13px 18px", textAlign: "right", fontWeight: 700, color: "#6c8b95" }}>عنوان</th>
                 <th style={{ padding: "13px 18px", textAlign: "right", fontWeight: 700, color: "#6c8b95", whiteSpace: "nowrap" }}>دسته‌بندی</th>
                 <th style={{ padding: "13px 18px", textAlign: "center", fontWeight: 700, color: "#6c8b95", whiteSpace: "nowrap" }}>تاریخ</th>
@@ -53,7 +56,10 @@ export default async function AdminBlogPage({ searchParams }: { searchParams: Pr
             </thead>
             <tbody>
               {posts.map((p, i) => (
-                <tr key={p.id} style={{ borderBottom: i < posts.length - 1 ? "1px solid #f1f8fa" : "none" }}>
+                <tr key={p.id} style={{ borderBottom: i < posts.length - 1 ? "1px solid #f1f8fa" : "none", background: p.isFeatured ? "#fffbf0" : "transparent" }}>
+                  <td style={{ padding: "13px 10px", textAlign: "center" }}>
+                    <FeaturedToggle id={p.id} isFeatured={p.isFeatured} />
+                  </td>
                   <td style={{ padding: "13px 18px", fontWeight: 600, color: "#143945", lineHeight: 1.5 }}>{p.title}</td>
                   <td style={{ padding: "13px 18px", color: "#6c8b95" }}>{p.category?.name || "—"}</td>
                   <td style={{ padding: "13px 18px", textAlign: "center", color: "#9bb6bf", fontSize: 13, whiteSpace: "nowrap" }}>{p.publishedAt ? toJalali(p.publishedAt) : "—"}</td>
@@ -61,6 +67,7 @@ export default async function AdminBlogPage({ searchParams }: { searchParams: Pr
                     <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
                       <Link href={`/${p.slug}`} target="_blank" style={{ fontSize: 13, color: "#0c8aa6", textDecoration: "none", fontWeight: 600 }}>مشاهده</Link>
                       <Link href={`/admin/blog/${p.id}`} style={{ fontSize: 13, color: "#6c8b95", textDecoration: "none", fontWeight: 600 }}>ویرایش</Link>
+                      <DeletePostBtn id={p.id} title={p.title} />
                     </div>
                   </td>
                 </tr>

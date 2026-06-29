@@ -7,7 +7,7 @@ import RichEditor from "@/components/admin/RichEditor";
 interface BlogPost {
   id: number; slug: string; title: string; content: string | null; excerpt: string | null;
   featuredImage: string | null; categoryId: number | null; metaTitle: string | null; metaDescription: string | null;
-  publishedAt: Date | null;
+  publishedAt: Date | null; isFeatured: boolean; authorName: string | null;
 }
 interface Category { id: number; name: string }
 
@@ -28,6 +28,8 @@ export default function BlogEditForm({ post, categories }: { post: BlogPost | nu
     metaTitle: post?.metaTitle || "",
     metaDescription: post?.metaDescription || "",
     publishedAt: toDateInput(post?.publishedAt || null),
+    isFeatured: post?.isFeatured ?? false,
+    authorName: post?.authorName || "",
   });
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
@@ -47,6 +49,7 @@ export default function BlogEditForm({ post, categories }: { post: BlogPost | nu
         ...form,
         categoryId: form.categoryId ? parseInt(form.categoryId) : null,
         publishedAt: form.publishedAt || null,
+        isFeatured: form.isFeatured,
       }),
     });
     setSaving(false);
@@ -59,13 +62,13 @@ export default function BlogEditForm({ post, categories }: { post: BlogPost | nu
     }
   };
 
-  const field = (label: string, key: string, type: "text" | "textarea" | "datetime-local" = "text") => (
+  const field = (label: string, key: keyof typeof form, type: "text" | "textarea" | "datetime-local" = "text") => (
     <div key={key}>
       <label style={{ display: "block", fontWeight: 600, fontSize: 13.5, color: "#133b48", marginBottom: 7 }}>{label}</label>
       {type === "textarea" ? (
-        <textarea value={(form as Record<string, string>)[key]} onChange={e => set(key, e.target.value)} rows={key === "content" ? 16 : 4} style={{ width: "100%", padding: "10px 12px", border: "1px solid #dceaef", borderRadius: 10, fontFamily: key === "content" ? "monospace" : "inherit", fontSize: 14, outline: "none", resize: "vertical", boxSizing: "border-box", direction: key === "content" ? "ltr" : "rtl" }} />
+        <textarea value={form[key] as string} onChange={e => set(key, e.target.value)} rows={4} style={{ width: "100%", padding: "10px 12px", border: "1px solid #dceaef", borderRadius: 10, fontFamily: "inherit", fontSize: 14, outline: "none", resize: "vertical", boxSizing: "border-box" }} />
       ) : (
-        <input type={type} value={(form as Record<string, string>)[key]} onChange={e => set(key, e.target.value)} style={{ width: "100%", padding: "10px 12px", border: "1px solid #dceaef", borderRadius: 10, fontFamily: "inherit", fontSize: 14, outline: "none", boxSizing: "border-box" }} />
+        <input type={type} value={form[key] as string} onChange={e => set(key, e.target.value)} style={{ width: "100%", padding: "10px 12px", border: "1px solid #dceaef", borderRadius: 10, fontFamily: "inherit", fontSize: 14, outline: "none", boxSizing: "border-box" }} />
       )}
     </div>
   );
@@ -85,6 +88,19 @@ export default function BlogEditForm({ post, categories }: { post: BlogPost | nu
         </div>
       </div>
       {field("تصویر شاخص (URL)", "featuredImage")}
+      <div style={{ display: "flex", alignItems: "center", gap: 18, background: "#f7fbfc", borderRadius: 12, padding: "14px 16px" }}>
+        <label style={{ display: "flex", alignItems: "center", gap: 10, cursor: "pointer", fontWeight: 600, fontSize: 14, color: "#133b48" }}>
+          <input type="checkbox" checked={form.isFeatured} onChange={e => setForm(f => ({ ...f, isFeatured: e.target.checked }))}
+            style={{ width: 18, height: 18, accentColor: "#0c8aa6", cursor: "pointer" }} />
+          مقاله ویژه (نمایش در بالای صفحه مقالات)
+        </label>
+      </div>
+      <div>
+        <label style={{ display: "block", fontWeight: 600, fontSize: 13.5, color: "#133b48", marginBottom: 7 }}>نویسنده</label>
+        <input value={form.authorName} onChange={e => set("authorName", e.target.value)} placeholder="تحریریه ایستگاه دندان"
+          style={{ width: "100%", padding: "10px 12px", border: "1px solid #dceaef", borderRadius: 10, fontFamily: "inherit", fontSize: 14, outline: "none", boxSizing: "border-box" }} />
+        <p style={{ margin: "5px 0 0", fontSize: 12, color: "#9bb6bf" }}>خالی = "تحریریه ایستگاه دندان"</p>
+      </div>
       {field("خلاصه", "excerpt", "textarea")}
       <div>
         <label style={{ display: "block", fontWeight: 600, fontSize: 13.5, color: "#133b48", marginBottom: 7 }}>محتوا</label>
