@@ -5,8 +5,11 @@ import { useState, useCallback } from "react";
 interface Loc {
   id: number; slug: string; title: string; shortTitle: string | null;
   parentId: number | null; order: number; shortDesc: string | null;
-  metaTitle: string | null; metaDescription: string | null;
+  longDesc: string | null; metaTitle: string | null; metaDescription: string | null;
 }
+
+interface LocWithFeatured extends Loc { featuredDentistIds: number[] }
+interface DentistOption { id: number; title: string }
 
 interface Props { initialLocations: Loc[] }
 
@@ -17,13 +20,18 @@ const GRADIENTS = [
   "linear-gradient(135deg,#6366f1,#0a6f9e)",
 ];
 
+type Tab = "structure" | "content";
+
 export default function LocationTree({ initialLocations }: Props) {
   const [locations, setLocations] = useState<Loc[]>(initialLocations);
   const [editId, setEditId] = useState<number | "new" | null>(null);
   const [collapsed, setCollapsed] = useState<Set<number>>(new Set());
-  const [form, setForm] = useState<Partial<Loc> & { parentId?: number | null }>({});
+  const [form, setForm] = useState<Partial<LocWithFeatured>>({});
+  const [locationDentists, setLocationDentists] = useState<DentistOption[]>([]);
+  const [loadingContent, setLoadingContent] = useState(false);
   const [saving, setSaving] = useState(false);
   const [msg, setMsg] = useState("");
+  const [activeTab, setActiveTab] = useState<Tab>("structure");
 
   const reload = useCallback(async () => {
     const res = await fetch("/api/admin/locations");
@@ -31,16 +39,32 @@ export default function LocationTree({ initialLocations }: Props) {
     setLocations(data);
   }, []);
 
-  const flash = (m: string) => { setMsg(m); setTimeout(() => setMsg(""), 3000); };
-
-  const openEdit = (loc: Loc) => {
-    setForm({ ...loc });
-    setEditId(loc.id);
-  };
+  const flash = (m: string) => { setMsg(m); setTimeout(() => setMsg(""), 3500); };
 
   const openNew = (parentId?: number) => {
-    setForm({ parentId: parentId ?? null, order: 0, title: "", shortTitle: "", slug: "" });
+    setForm({ parentId: parentId ?? null, order: 0, title: "", shortTitle: "", slug: "", featuredDentistIds: [] });
+    setLocationDentists([]);
     setEditId("new");
+    setActiveTab("structure");
+  };
+
+  const openEdit = async (loc: Loc) => {
+    setForm({ ...loc, featuredDentistIds: [] });
+    setEditId(loc.id);
+    setActiveTab("structure");
+    setLoadingContent(true);
+    setLocationDentists([]);
+    try {
+      const [detailRes, dentistsRes] = await Promise.all([
+        fetch(`/api/admin/locations/${loc.id}`),
+        fetch(`/api/admin/locations/${loc.id}/dentists`),
+      ]);
+      const detail = await detailRes.json() as LocWithFeatured;
+      const dents = await dentistsRes.json() as DentistOption[];
+      setForm(f => ({ ...f, ...detail }));
+      setLocationDentists(dents);
+    } catch { /* silent */ }
+    setLoadingContent(false);
   };
 
   const save = async () => {
@@ -77,7 +101,11 @@ export default function LocationTree({ initialLocations }: Props) {
     const n = new Set(s); if (n.has(id)) n.delete(id); else n.add(id); return n;
   });
 
-  // Build tree
+  const toggleFeatured = (id: number) => setForm(f => {
+    const cur = f.featuredDentistIds ?? [];
+    return { ...f, featuredDentistIds: cur.includes(id) ? cur.filter(x => x !== id) : [...cur, id] };
+  });
+
   const roots = locations.filter(l => !l.parentId).sort((a, b) => a.order - b.order);
   const childrenOf = (pid: number) => locations.filter(l => l.parentId === pid).sort((a, b) => a.order - b.order);
 
@@ -87,16 +115,28 @@ export default function LocationTree({ initialLocations }: Props) {
     return p ? depth(p) + 1 : 0;
   };
 
-  const inp = (label: string, key: keyof typeof form, type: "text" | "number" = "text") => (
+  const inp = (label: string, key: keyof LocWithFeatured, type: "text" | "number" = "text") => (
     <div key={key}>
       <label style={{ display: "block", fontSize: 12.5, fontWeight: 600, color: "#133b48", marginBottom: 5 }}>{label}</label>
-      <input
-        type={type}
-        value={(form[key] as string | number) ?? ""}
+      <input type={type} value={(form[key] as string | number) ?? ""}
         onChange={e => setForm(f => ({ ...f, [key]: type === "number" ? Number(e.target.value) : e.target.value }))}
-        style={{ width: "100%", padding: "9px 11px", border: "1px solid #dceaef", borderRadius: 9, fontFamily: "inherit", fontSize: 13.5, outline: "none", boxSizing: "border-box" }}
-      />
+        style={{ width: "100%", padding: "9px 11px", border: "1px solid #dceaef", borderRadius: 9, fontFamily: "inherit", fontSize: 13.5, outline: "none", boxSizing: "border-box" }} />
     </div>
+  );
+
+  const textarea = (label: string, key: keyof LocWithFeatured, rows = 4, mono = false) => (
+    <div key={key}>
+      <label style={{ display: "block", fontSize: 12.5, fontWeight: 600, color: "#133b48", marginBottom: 5 }}>{label}</label>
+      <textarea value={(form[key] as string) ?? ""} rows={rows}
+        onChange={e => setForm(f => ({ ...f, [key]: e.target.value }))}
+        style={{ width: "100%", padding: "9px 11px", border: "1px solid #dceaef", borderRadius: 9, fontFamily: mono ? "monospace" : "inherit", fontSize: 13, outline: "none", resize: "vertical", boxSizing: "border-box", direction: mono ? "ltr" : "rtl" }} />
+    </div>
+  );
+
+  const tabBtn = (tab: Tab, label: string) => (
+    <button onClick={() => setActiveTab(tab)} style={{ padding: "8px 18px", borderRadius: 8, border: "none", background: activeTab === tab ? "linear-gradient(135deg,#15b8d1,#0a6f9e)" : "#eef4f6", color: activeTab === tab ? "#fff" : "#4a6c75", fontFamily: "inherit", fontWeight: 600, fontSize: 13.5, cursor: "pointer" }}>
+      {label}
+    </button>
   );
 
   const renderNode = (loc: Loc, level: number) => {
@@ -137,48 +177,107 @@ export default function LocationTree({ initialLocations }: Props) {
     <div>
       {/* Toolbar */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <button onClick={() => openNew()} style={{ padding: "10px 20px", borderRadius: 11, border: "none", background: "linear-gradient(135deg,#15b8d1,#0a6f9e)", color: "#fff", fontFamily: "inherit", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
             + افزودن منطقه جدید
           </button>
-          {msg && <span style={{ fontSize: 14, fontWeight: 600, color: msg.includes("خطا") ? "#dc2626" : "#16a34a", alignSelf: "center" }}>{msg}</span>}
+          {msg && <span style={{ fontSize: 14, fontWeight: 600, color: msg.includes("خطا") ? "#dc2626" : "#16a34a" }}>{msg}</span>}
         </div>
         <span style={{ fontSize: 13, color: "#6c8b95" }}>{locations.length} منطقه</span>
       </div>
 
-      {/* Edit panel */}
+      {/* Edit Panel */}
       {editId !== null && (
-        <div style={{ background: "#fff", border: "1px solid #e7f0f3", borderRadius: 16, padding: 22, marginBottom: 20, boxShadow: "0 8px 24px -16px rgba(13,75,107,.4)" }}>
-          <h3 style={{ margin: "0 0 16px", fontSize: 16, fontWeight: 700, color: "#133b48" }}>
-            {editId === "new" ? "افزودن منطقه" : "ویرایش منطقه"}
-          </h3>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
-            {inp("عنوان کامل (برای صفحه)", "title")}
-            {inp("عنوان کوتاه (برای breadcrumb)", "shortTitle")}
-            {inp("اسلاگ (URL)", "slug")}
-            {inp("ترتیب نمایش", "order", "number")}
+        <div style={{ background: "#fff", border: "1px solid #e7f0f3", borderRadius: 18, padding: 24, marginBottom: 22, boxShadow: "0 8px 28px -16px rgba(13,75,107,.4)" }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 18 }}>
+            <h3 style={{ margin: 0, fontSize: 17, fontWeight: 700, color: "#133b48" }}>
+              {editId === "new" ? "افزودن منطقه جدید" : `ویرایش: ${form.shortTitle || form.title || ""}`}
+            </h3>
+            <div style={{ display: "flex", gap: 8 }}>
+              {tabBtn("structure", "ساختار")}
+              {editId !== "new" && tabBtn("content", "محتوا")}
+            </div>
           </div>
-          <div style={{ marginBottom: 12 }}>
-            <label style={{ display: "block", fontSize: 12.5, fontWeight: 600, color: "#133b48", marginBottom: 5 }}>والد (منطقه بالاتر)</label>
-            <select
-              value={form.parentId ?? ""}
-              onChange={e => setForm(f => ({ ...f, parentId: e.target.value ? parseInt(e.target.value) : null }))}
-              style={{ width: "100%", padding: "9px 11px", border: "1px solid #dceaef", borderRadius: 9, fontFamily: "inherit", fontSize: 13.5, outline: "none", background: "#fff" }}
-            >
-              <option value="">— بدون والد (سطح شهر) —</option>
-              {locations.filter(l => l.id !== editId).sort((a,b) => {
-                const da = depth(a), db2 = depth(b);
-                return da !== db2 ? da - db2 : (a.shortTitle||a.title).localeCompare(b.shortTitle||b.title, "fa");
-              }).map(l => (
-                <option key={l.id} value={l.id}>{"—".repeat(depth(l))} {l.shortTitle || l.title}</option>
-              ))}
-            </select>
-          </div>
-          <div style={{ display: "flex", gap: 8 }}>
-            <button onClick={save} disabled={saving} style={{ padding: "10px 24px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#15b8d1,#0a6f9e)", color: "#fff", fontFamily: "inherit", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
+
+          {/* ── Tab: Structure ── */}
+          {activeTab === "structure" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+                {inp("عنوان کامل (برای صفحه)", "title")}
+                {inp("عنوان کوتاه (برای breadcrumb)", "shortTitle")}
+                {inp("اسلاگ (URL)", "slug")}
+                {inp("ترتیب نمایش", "order", "number")}
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: 12.5, fontWeight: 600, color: "#133b48", marginBottom: 5 }}>والد (منطقه بالاتر)</label>
+                <select value={form.parentId ?? ""}
+                  onChange={e => setForm(f => ({ ...f, parentId: e.target.value ? parseInt(e.target.value) : null }))}
+                  style={{ width: "100%", padding: "9px 11px", border: "1px solid #dceaef", borderRadius: 9, fontFamily: "inherit", fontSize: 13.5, outline: "none", background: "#fff" }}>
+                  <option value="">— بدون والد (سطح شهر) —</option>
+                  {locations.filter(l => l.id !== editId).sort((a, b) => {
+                    const da = depth(a), db2 = depth(b);
+                    return da !== db2 ? da - db2 : (a.shortTitle || a.title).localeCompare(b.shortTitle || b.title, "fa");
+                  }).map(l => (
+                    <option key={l.id} value={l.id}>{"—".repeat(depth(l))} {l.shortTitle || l.title}</option>
+                  ))}
+                </select>
+              </div>
+              {textarea("توضیح کوتاه (نمایش در Hero)", "shortDesc", 3)}
+            </div>
+          )}
+
+          {/* ── Tab: Content ── */}
+          {activeTab === "content" && editId !== "new" && (
+            <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              {loadingContent && <div style={{ color: "#6c8b95", fontSize: 14, padding: "12px 0" }}>در حال بارگذاری...</div>}
+
+              {/* SEO */}
+              <div style={{ background: "#f7fbfc", borderRadius: 12, padding: 16 }}>
+                <div style={{ fontWeight: 700, fontSize: 13.5, color: "#133b48", marginBottom: 12 }}>سئو</div>
+                <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+                  {inp("عنوان سئو (meta title)", "metaTitle")}
+                  {textarea("توضیح سئو (meta description)", "metaDescription", 2)}
+                </div>
+              </div>
+
+              {/* Long Desc */}
+              {textarea("توضیحات بلند صفحه (HTML)", "longDesc", 10, true)}
+
+              {/* Featured Dentists */}
+              <div>
+                <div style={{ fontWeight: 700, fontSize: 13.5, color: "#133b48", marginBottom: 8 }}>
+                  دندانپزشکان نمونه این منطقه
+                  <span style={{ fontWeight: 400, fontSize: 12, color: "#9bb6bf", marginRight: 8 }}>
+                    ({locationDentists.length} دندانپزشک در این منطقه)
+                  </span>
+                </div>
+                {locationDentists.length === 0 && !loadingContent && (
+                  <p style={{ fontSize: 13, color: "#9bb6bf", margin: 0 }}>هنوز دندانپزشکی در این منطقه ثبت نشده.</p>
+                )}
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  {locationDentists.map(d => {
+                    const selected = (form.featuredDentistIds ?? []).includes(d.id);
+                    return (
+                      <button key={d.id} type="button" onClick={() => toggleFeatured(d.id)}
+                        style={{ padding: "7px 14px", borderRadius: 20, border: "1px solid", fontSize: 13, fontWeight: 600, fontFamily: "inherit", cursor: "pointer", background: selected ? "linear-gradient(135deg,#15b8d1,#0a6f9e)" : "#fff", color: selected ? "#fff" : "#2a4f5b", borderColor: selected ? "transparent" : "#d7e6ea" }}>
+                        {d.title}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div style={{ display: "flex", gap: 8, marginTop: 18 }}>
+            <button onClick={save} disabled={saving}
+              style={{ padding: "10px 24px", borderRadius: 10, border: "none", background: "linear-gradient(135deg,#15b8d1,#0a6f9e)", color: "#fff", fontFamily: "inherit", fontWeight: 700, fontSize: 14, cursor: "pointer", opacity: saving ? .7 : 1 }}>
               {saving ? "…" : "ذخیره"}
             </button>
-            <button onClick={() => setEditId(null)} style={{ padding: "10px 18px", borderRadius: 10, border: "1px solid #d7e6ea", background: "transparent", color: "#6c8b95", fontFamily: "inherit", fontSize: 14, cursor: "pointer" }}>انصراف</button>
+            <button onClick={() => setEditId(null)}
+              style={{ padding: "10px 18px", borderRadius: 10, border: "1px solid #d7e6ea", background: "transparent", color: "#6c8b95", fontFamily: "inherit", fontSize: 14, cursor: "pointer" }}>
+              انصراف
+            </button>
           </div>
         </div>
       )}

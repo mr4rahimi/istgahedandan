@@ -7,7 +7,7 @@ export const metadata: Metadata = { title: "مناطق | ادمین" };
 export default async function AdminLocationsPage() {
   const locations = await prisma.location.findMany({
     orderBy: [{ parentId: "asc" }, { order: "asc" }, { title: "asc" }],
-    select: { id: true, slug: true, title: true, shortTitle: true, parentId: true, order: true, shortDesc: true, metaTitle: true, metaDescription: true },
+    select: { id: true, slug: true, title: true, shortTitle: true, parentId: true, order: true, shortDesc: true, longDesc: true, metaTitle: true, metaDescription: true },
   });
 
   return (
