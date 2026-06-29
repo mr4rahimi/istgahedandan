@@ -22,6 +22,7 @@ export default function MobileNav() {
   const active = pathname === "/" ? "home"
     : pathname.startsWith("/services") ? "services"
     : pathname.startsWith("/dentists-list") ? "dentists"
+    : pathname.startsWith("/map") ? "map"
     : pathname.startsWith("/mag") ? "blog"
     : "";
 
@@ -61,9 +62,9 @@ export default function MobileNav() {
           <span style={{ fontSize: 11, fontWeight: 600 }}>جستجو</span>
         </button>
 
-        <Link href="/تماس-با-ما" style={mk("contact")}>
-          <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
-          <span style={{ fontSize: 11, fontWeight: 600 }}>تماس</span>
+        <Link href="/map" style={mk("map")}>
+          <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" /><line x1="8" y1="2" x2="8" y2="18" /><line x1="16" y1="6" x2="16" y2="22" /></svg>
+          <span style={{ fontSize: 11, fontWeight: 600 }}>نقشه</span>
         </Link>
 
       </nav>
