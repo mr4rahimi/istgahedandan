@@ -213,7 +213,7 @@ export default async function HomePage() {
                 <div><div style={{ fontSize: 30, fontWeight: 800, color: "#fff" }}>+۴۹</div><div style={{ fontSize: 13, color: "#9fc2cc" }}>منطقه پوشش</div></div>
                 <div><div style={{ fontSize: 30, fontWeight: 800, color: "#fff" }}>۲۴ساعته</div><div style={{ fontSize: 13, color: "#9fc2cc" }}>رزرو آنلاین نوبت</div></div>
               </div>
-              <Link href="/درباره-ما" style={{ display: "inline-block", marginTop: 28, background: "#fff", color: "#0b5e7a", textDecoration: "none", fontWeight: 700, fontSize: 15, padding: "13px 28px", borderRadius: 13 }}>بیشتر بدانید</Link>
+              <Link href="/about" style={{ display: "inline-block", marginTop: 28, background: "#fff", color: "#0b5e7a", textDecoration: "none", fontWeight: 700, fontSize: 15, padding: "13px 28px", borderRadius: 13 }}>بیشتر بدانید</Link>
             </div>
           </div>
         </div>

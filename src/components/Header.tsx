@@ -10,7 +10,7 @@ const NAV_LINKS = [
   { key: "services", label: "خدمات", href: "/services" },
   { key: "dentists", label: "لیست دندانپزشکی‌ها", href: "/dentists-list" },
   { key: "blog", label: "مقالات", href: "/mag" },
-  { key: "about", label: "درباره ما", href: "/درباره-ما" },
+  { key: "about", label: "درباره ما", href: "/about" },
   { key: "contact", label: "تماس با ما", href: "/contact" },
 ];
 
