@@ -18,17 +18,28 @@ export default function DentistMap({ lat, lng, title }: Props) {
     import("leaflet").then(L => {
       if (!ref.current) return;
 
-      // Destroy previous instance if any (Strict Mode / hot reload)
+      // Destroy previous instance (Strict Mode / hot reload guard)
       if (mapRef.current) {
         mapRef.current.remove();
         mapRef.current = null;
       }
+      // Also clear any stale _leaflet_id left on the DOM node
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (ref.current as any)._leaflet_id;
 
-      const map = L.map(ref.current).setView([lat, lng], 15);
+      delete (L.Icon.Default.prototype as any)._getIconUrl; // eslint-disable-line @typescript-eslint/no-explicit-any
+      L.Icon.Default.mergeOptions({
+        iconUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
+        iconRetinaUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png",
+        shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
+      });
+
+      const map = L.map(ref.current, { zoomControl: true }).setView([lat, lng], 15);
       mapRef.current = map;
 
       L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "© OpenStreetMap",
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19,
       }).addTo(map);
 
       const icon = L.divIcon({
@@ -42,8 +53,10 @@ export default function DentistMap({ lat, lng, title }: Props) {
 
       L.marker([lat, lng], { icon }).addTo(map).bindPopup(title).openPopup();
 
-      // Force Leaflet to recalculate container size after layout is settled
-      setTimeout(() => map.invalidateSize(), 0);
+      // Leaflet reads container size at init time — wait one frame for layout to settle
+      requestAnimationFrame(() => {
+        map.invalidateSize();
+      });
     });
 
     return () => {
@@ -53,6 +66,10 @@ export default function DentistMap({ lat, lng, title }: Props) {
   }, [lat, lng, title]);
 
   return (
-    <div ref={ref} style={{ width: "100%", height: "100%", borderRadius: 16 }} />
+    <>
+      {/* Leaflet CSS must be present before the map renders */}
+      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+      <div ref={ref} style={{ width: "100%", height: "100%" }} />
+    </>
   );
 }
