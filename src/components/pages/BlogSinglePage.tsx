@@ -6,6 +6,8 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import MobileNav from "@/components/MobileNav";
 import { toJalali, estimateReadTime, getInitial, gradientFromId } from "@/lib/utils";
+import { articleSchema, breadcrumbSchema, SITE_URL } from "@/lib/seo";
+import JsonLd from "@/components/JsonLd";
 
 const articleBgs = [
   "linear-gradient(135deg,#0c5e7c,#0a3f54)",
@@ -33,8 +35,29 @@ export default async function BlogSinglePage({ slug }: { slug: string }) {
   const authorName = post.authorName || "تحریریه ایستگاه دندان";
   const initial = getInitial(authorName);
 
+  const schemas = [
+    articleSchema({
+      slug: post.slug,
+      title: post.title,
+      shortDesc: post.metaDescription,
+      content: post.content,
+      featuredImage: post.featuredImage,
+      publishedAt: post.publishedAt,
+      updatedAt: post.updatedAt,
+      authorName,
+      categoryName: post.category?.name,
+    }),
+    breadcrumbSchema([
+      { name: "خانه", url: SITE_URL },
+      { name: "مقالات", url: `${SITE_URL}/mag` },
+      ...(post.category ? [{ name: post.category.name, url: `${SITE_URL}/mag` }] : []),
+      { name: post.title, url: `${SITE_URL}/${post.slug}` },
+    ]),
+  ];
+
   return (
     <div style={{ direction: "rtl", fontFamily: "inherit", background: "#f4f9fb", color: "#16313b", minHeight: "100vh", paddingBottom: 80 }}>
+      <JsonLd data={schemas} />
       <Header />
 
       {/* Hero */}

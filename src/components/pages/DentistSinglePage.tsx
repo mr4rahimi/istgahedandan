@@ -12,6 +12,8 @@ import DentistGallery from "@/components/DentistGallery";
 import DentistVideoSection from "@/components/DentistVideoSection";
 import ReviewReply from "@/components/ReviewReply";
 import { toJalali, getInitial, gradientFromId } from "@/lib/utils";
+import { dentistSchema, breadcrumbSchema, SITE_URL } from "@/lib/seo";
+import JsonLd from "@/components/JsonLd";
 
 export default async function DentistSinglePage({ slug }: { slug: string }) {
   const dentist = await prisma.dentist.findUnique({ where: { slug } });
@@ -108,8 +110,42 @@ export default async function DentistSinglePage({ slug }: { slug: string }) {
 
   const phoneList: string[] = Array.isArray(dentist.phones) ? dentist.phones as string[] : [];
 
+  const primaryLocation = locationsData[0];
+  const locationTitle = primaryLocation?.shortTitle || primaryLocation?.title;
+
+  const schemaData = dentistSchema({
+    slug: dentist.slug,
+    title: dentist.title,
+    shortDesc: dentist.shortDesc,
+    address: dentist.address,
+    phones: phoneList,
+    featuredImage: dentist.featuredImage,
+    mapLat: dentist.mapLat,
+    mapLng: dentist.mapLng,
+    workingHours: dentist.workingHours,
+    avgRating: displayRating,
+    reviewCount: ratedReviews.length > 0 ? ratedReviews.length : undefined,
+    reviews: reviews.slice(0, 5).map(r => ({
+      author: r.authorName || "کاربر ایستگاه دندان",
+      rating: r.rating,
+      body: r.content,
+      date: r.createdAt.toISOString().split("T")[0],
+    })),
+    faqs: faqs.map(f => ({ question: f.question, answer: f.answer })),
+    services: servicesData.map(s => s.title),
+    locationTitle,
+  });
+
+  const breadcrumb = breadcrumbSchema([
+    { name: "خانه", url: SITE_URL },
+    { name: "دندانپزشکان", url: `${SITE_URL}/dentists-list` },
+    ...(locationTitle ? [{ name: locationTitle, url: `${SITE_URL}/${primaryLocation?.slug}` }] : []),
+    { name: dentist.title, url: `${SITE_URL}/${dentist.slug}` },
+  ]);
+
   return (
     <div style={{ direction: "rtl", fontFamily: "inherit", background: "#f4f9fb", color: "#16313b", minHeight: "100vh", paddingBottom: 80 }}>
+      <JsonLd data={[...schemaData, breadcrumb]} />
       <Header />
 
       {/* COVER + PROFILE HEADER */}

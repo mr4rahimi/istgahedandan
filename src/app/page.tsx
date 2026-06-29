@@ -8,6 +8,8 @@ import HomeSlider from "@/components/HomeSlider";
 import HomeStories from "@/components/HomeStories";
 import HomeSearch from "@/components/HomeSearch";
 import { toJalali, estimateReadTime, getInitial, gradientFromId } from "@/lib/utils";
+import { websiteSchema, breadcrumbSchema, SITE_URL } from "@/lib/seo";
+import JsonLd from "@/components/JsonLd";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -126,6 +128,7 @@ export default async function HomePage() {
 
   return (
     <div style={{ direction: "rtl", fontFamily: "inherit", background: "#f4f9fb", color: "#16313b", minHeight: "100vh", paddingBottom: 80 }}>
+      <JsonLd data={[...websiteSchema(), breadcrumbSchema([{ name: "خانه", url: SITE_URL }])]} />
       <Header />
 
       {/* Stories */}

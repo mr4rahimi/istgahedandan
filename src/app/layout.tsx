@@ -23,6 +23,15 @@ export const metadata: Metadata = {
     type: "website",
     locale: "fa_IR",
     siteName: "ایستگاه دندان",
+    images: [{ url: "/assets/og-default.jpg", width: 1200, height: 630, alt: "ایستگاه دندان" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@istgahedandan",
+    images: ["/assets/og-default.jpg"],
+  },
+  alternates: {
+    canonical: process.env.NEXT_PUBLIC_SITE_URL || "https://istgahedandan.ir",
   },
   robots: {
     index: true,

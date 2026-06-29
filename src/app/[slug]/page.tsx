@@ -27,15 +27,47 @@ async function resolveSlug(slug: string) {
   return null;
 }
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://istgahedandan.ir";
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug: rawSlug } = await params;
   const slug = decodeURIComponent(rawSlug);
   const result = await resolveSlug(slug);
   if (!result) return { title: "صفحه یافت نشد" };
-  const d = result.data as { metaTitle?: string | null; title?: string; metaDescription?: string | null };
+
+  const d = result.data as {
+    metaTitle?: string | null; title?: string; metaDescription?: string | null;
+    shortDesc?: string | null; featuredImage?: string | null; publishedAt?: Date | null;
+    authorName?: string | null;
+  };
+
+  const title = d.metaTitle || d.title || "ایستگاه دندان";
+  const description = d.metaDescription || d.shortDesc || undefined;
+  const image = d.featuredImage || `${SITE_URL}/assets/og-default.jpg`;
+  const canonical = `${SITE_URL}/${slug}`;
+
+  const ogType: "article" | "website" = result.type === "blog" ? "article" : "website";
+
   return {
-    title: d.metaTitle || d.title || "ایستگاه دندان",
-    description: d.metaDescription || undefined,
+    title,
+    description,
+    alternates: { canonical },
+    openGraph: {
+      title,
+      description,
+      url: canonical,
+      type: ogType,
+      images: [{ url: image, width: 1200, height: 630, alt: title }],
+      locale: "fa_IR",
+      siteName: "ایستگاه دندان",
+      ...(result.type === "blog" && d.publishedAt ? { publishedTime: d.publishedAt.toISOString() } : {}),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: [image],
+    },
   };
 }
 
