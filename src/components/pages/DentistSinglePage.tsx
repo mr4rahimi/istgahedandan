@@ -67,48 +67,61 @@ export default async function DentistSinglePage({ slug }: { slug: string }) {
 
       {/* COVER + PROFILE HEADER */}
       <section style={{ position: "relative" }}>
+        {/* Cover image */}
         <div style={{ height: 230, position: "relative", background: "linear-gradient(135deg,#0c5e7c,#0a3f54)", overflow: "hidden" }}>
           {dentist.featuredImage && (
             <Image src={dentist.featuredImage} alt={dentist.title} fill style={{ objectFit: "cover" }} />
           )}
           <div style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(135deg,rgba(255,255,255,.1) 0 16px,rgba(255,255,255,.03) 16px 32px)" }} />
         </div>
+
+        {/* Info band below cover */}
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "0 16px" }}>
-          <div style={{ marginTop: -64, position: "relative", display: "flex", gap: 20, alignItems: "flex-end", flexWrap: "wrap" }}>
-            <span style={{ width: 120, height: 120, borderRadius: 28, background: gradientFromId(dentist.id), border: "5px solid #f4f9fb", display: "grid", placeItems: "center", color: "#fff", fontWeight: 800, fontSize: 46, boxShadow: "0 14px 30px -12px rgba(13,120,168,.6)", flexShrink: 0 }}>{initial}</span>
-            <div style={{ flex: 1, minWidth: 240, paddingBottom: 6 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-                <h1 style={{ margin: 0, fontSize: "clamp(24px,3.4vw,34px)", fontWeight: 800, color: "#133b48" }}>{dentist.title}</h1>
-                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "#e7f7ee", color: "#16a34a", fontSize: 13, fontWeight: 700, padding: "5px 11px", borderRadius: 20 }}>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
-                  تأیید شده
-                </span>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 12, marginTop: 10, flexWrap: "wrap", color: "#5e7c85", fontSize: 14 }}>
-                {displayRating !== null && (
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "#fff6e6", color: "#d98a00", fontWeight: 700, padding: "4px 10px", borderRadius: 8 }}>
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="#f5a623"><path d="M12 2l2.9 6.1 6.6.9-4.8 4.6 1.2 6.5L12 17.8 6.1 20.6l1.2-6.5L2.5 9.5l6.6-.9z" /></svg>
-                    {displayRating.toFixed(1)} ({reviewCount} نظر)
-                  </span>
-                )}
-                {dentist.address && (
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9bb6bf" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>
-                    {dentist.address.slice(0, 40)}
-                  </span>
-                )}
-                {locationLinks.map(dl => (
-                  <Link key={dl.locationId} href={`/${dl.location.slug}`} style={{ display: "inline-flex", alignItems: "center", gap: 4, color: "#0c8aa6", textDecoration: "none", fontSize: 13, fontWeight: 600, background: "#eef7fa", padding: "3px 9px", borderRadius: 8 }}>
-                    {dl.location.title}
-                  </Link>
-                ))}
-              </div>
-            </div>
-            <div style={{ display: "flex", gap: 10, paddingBottom: 8 }}>
+
+          {/* Avatar + buttons row */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+            <span style={{ width: 150, height: 150, borderRadius: 32, background: gradientFromId(dentist.id), border: "5px solid #f4f9fb", display: "grid", placeItems: "center", color: "#fff", fontWeight: 800, fontSize: 56, boxShadow: "0 14px 30px -12px rgba(13,120,168,.6)", flexShrink: 0, marginTop: -75 }}>
+              {initial}
+            </span>
+            <div style={{ display: "flex", gap: 10, paddingTop: 20 }}>
               <Link href="#reviews" style={{ background: "linear-gradient(135deg,#15b8d1,#0a6f9e)", color: "#fff", textDecoration: "none", fontWeight: 700, fontSize: 15, padding: "13px 26px", borderRadius: 13, boxShadow: "0 10px 22px -10px rgba(13,120,168,.7)" }}>رزرو نوبت</Link>
-              <button style={{ width: 48, border: "1px solid #d7e6ea", background: "#fff", borderRadius: 13, display: "grid", placeItems: "center", cursor: "pointer", color: "#0c8aa6" }}>
+              <button style={{ width: 48, height: 48, border: "1px solid #d7e6ea", background: "#fff", borderRadius: 13, display: "grid", placeItems: "center", cursor: "pointer", color: "#0c8aa6" }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M19 14c1.5-1.5 3-3.5 3-5.5A4.5 4.5 0 0 0 12 6 4.5 4.5 0 0 0 2 8.5c0 2 1.5 4 3 5.5l7 7z" /></svg>
               </button>
+            </div>
+          </div>
+
+          {/* Title + breadcrumbs below avatar */}
+          <div style={{ marginTop: 16, paddingBottom: 8 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+              <h1 style={{ margin: 0, fontSize: "clamp(22px,3.2vw,32px)", fontWeight: 800, color: "#133b48" }}>{dentist.title}</h1>
+              <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "#e7f7ee", color: "#16a34a", fontSize: 13, fontWeight: 700, padding: "5px 11px", borderRadius: 20 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"><polyline points="20 6 9 17 4 12" /></svg>
+                تأیید شده
+              </span>
+            </div>
+
+            {/* Breadcrumbs + rating */}
+            <div style={{ display: "flex", alignItems: "center", gap: 16, marginTop: 10, flexWrap: "wrap" }}>
+              {/* Breadcrumbs */}
+              <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 13.5, flexWrap: "wrap" }}>
+                <Link href="/دندانپزشکان" style={{ color: "#0c8aa6", textDecoration: "none", fontWeight: 600 }}>دندانپزشکان</Link>
+                {locationLinks.map(dl => (
+                  <span key={dl.locationId} style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#9bb6bf" strokeWidth="2.5" strokeLinecap="round"><polyline points="9 18 15 12 9 6" /></svg>
+                    <Link href={`/${dl.location.slug}`} style={{ color: "#0c8aa6", textDecoration: "none", fontWeight: 600 }}>{dl.location.title}</Link>
+                  </span>
+                ))}
+              </div>
+
+              {/* Rating */}
+              {displayRating !== null && (
+                <span style={{ display: "inline-flex", alignItems: "center", gap: 5, background: "#fff6e6", color: "#d98a00", fontWeight: 700, padding: "4px 12px", borderRadius: 10, fontSize: 13.5 }}>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="#f5a623"><path d="M12 2l2.9 6.1 6.6.9-4.8 4.6 1.2 6.5L12 17.8 6.1 20.6l1.2-6.5L2.5 9.5l6.6-.9z" /></svg>
+                  {displayRating.toFixed(1)}
+                  <span style={{ color: "#b8966a", fontWeight: 500 }}>({reviewCount} نظر)</span>
+                </span>
+              )}
             </div>
           </div>
         </div>
@@ -123,7 +136,7 @@ export default async function DentistSinglePage({ slug }: { slug: string }) {
 
           {/* Contact */}
           <div style={{ background: "#fff", border: "1px solid #e7f0f3", borderRadius: 22, padding: 26, boxShadow: "0 16px 40px -32px rgba(13,75,107,.5)" }}>
-            <h2 style={{ margin: "0 0 20px", fontSize: 19, fontWeight: 800, color: "#133b48" }}>اطلاعات تماس</h2>
+            <h2 style={{ margin: "0 0 20px", fontSize: 19, fontWeight: 800, color: "#133b48" }}>اطلاعات و راه‌های ارتباطی</h2>
             <div style={{ display: "flex", flexDirection: "column", gap: 4 }}>
 
               {phoneList.length > 0 && (
