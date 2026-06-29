@@ -7,6 +7,7 @@ import Footer from "@/components/Footer";
 import MobileNav from "@/components/MobileNav";
 import { gradientFromId } from "@/lib/utils";
 import DentistInfiniteGrid from "@/components/DentistInfiniteGrid";
+import DragScroll from "@/components/DragScroll";
 
 const TAKE_FIRST = 12;
 
@@ -151,7 +152,7 @@ export default async function LocationPage({ slug }: { slug: string }) {
       {/* Sub-region filter chips — direct children only */}
       {children.length > 0 && (
         <section style={{ maxWidth: 1280, margin: "0 auto", padding: "20px 16px 6px" }}>
-          <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 6, scrollbarWidth: "none" }}>
+          <DragScroll>
             <span style={{ border: "none", background: "linear-gradient(135deg,#15b8d1,#0a6f9e)", color: "#fff", fontWeight: 700, fontSize: 14, padding: "9px 18px", borderRadius: 30, whiteSpace: "nowrap", flexShrink: 0 }}>
               {location.shortTitle || location.title}
             </span>
@@ -161,7 +162,7 @@ export default async function LocationPage({ slug }: { slug: string }) {
                 {loc.shortTitle || loc.title}
               </Link>
             ))}
-          </div>
+          </DragScroll>
         </section>
       )}
 
