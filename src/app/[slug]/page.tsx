@@ -28,7 +28,8 @@ async function resolveSlug(slug: string) {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = decodeURIComponent(rawSlug);
   const result = await resolveSlug(slug);
   if (!result) return { title: "صفحه یافت نشد" };
   const d = result.data as { metaTitle?: string | null; title?: string; metaDescription?: string | null };
@@ -39,7 +40,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function SlugPage({ params }: Props) {
-  const { slug } = await params;
+  const { slug: rawSlug } = await params;
+  const slug = decodeURIComponent(rawSlug);
   const result = await resolveSlug(slug);
   if (!result) notFound();
 
