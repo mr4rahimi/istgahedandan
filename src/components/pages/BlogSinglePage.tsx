@@ -30,7 +30,8 @@ export default async function BlogSinglePage({ slug }: { slug: string }) {
   });
 
   const readTime = estimateReadTime(post.content || "");
-  const initial = getInitial(post.title);
+  const authorName = post.authorName || "تحریریه ایستگاه دندان";
+  const initial = getInitial(authorName);
 
   return (
     <div style={{ direction: "rtl", fontFamily: "inherit", background: "#f4f9fb", color: "#16313b", minHeight: "100vh", paddingBottom: 80 }}>
@@ -56,7 +57,7 @@ export default async function BlogSinglePage({ slug }: { slug: string }) {
             <div style={{ display: "flex", alignItems: "center", gap: 16, color: "#cfe4ea", fontSize: 14, flexWrap: "wrap" }}>
               <span style={{ display: "inline-flex", alignItems: "center", gap: 8 }}>
                 <span style={{ width: 38, height: 38, borderRadius: "50%", background: "linear-gradient(135deg,#16b8d1,#0a6f9e)", display: "grid", placeItems: "center", color: "#fff", fontWeight: 700, border: "2px solid rgba(255,255,255,.4)", flexShrink: 0 }}>{initial}</span>
-                ایستگاه دندان
+                {authorName}
               </span>
               <span style={{ display: "inline-flex", alignItems: "center", gap: 5 }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="9" /><polyline points="12 7 12 12 15 14" strokeLinecap="round" /></svg>
@@ -85,7 +86,7 @@ export default async function BlogSinglePage({ slug }: { slug: string }) {
         <div style={{ background: "linear-gradient(135deg,#0e4d63,#0a2f3e)", borderRadius: 20, padding: 26, marginTop: 22, display: "flex", gap: 18, alignItems: "center", flexWrap: "wrap", color: "#fff" }}>
           <span style={{ width: 70, height: 70, borderRadius: 20, background: "linear-gradient(135deg,#16b8d1,#0a6f9e)", display: "grid", placeItems: "center", color: "#fff", fontWeight: 800, fontSize: 28, flexShrink: 0 }}>{initial}</span>
           <div style={{ flex: 1, minWidth: 200 }}>
-            <div style={{ fontSize: 18, fontWeight: 800 }}>تحریریه ایستگاه دندان</div>
+            <div style={{ fontSize: 18, fontWeight: 800 }}>{authorName}</div>
             <div style={{ fontSize: 13, color: "#9fc2cc", margin: "4px 0 8px" }}>مرجع تخصصی دندانپزشکی</div>
             <p style={{ margin: 0, fontSize: 14, color: "#c4dde4", lineHeight: 1.9 }}>مقالات آموزشی و تخصصی در حوزه دندانپزشکی برای بیماران و علاقمندان.</p>
           </div>

@@ -30,7 +30,8 @@ export default async function BlogPage({ searchParams }: { searchParams: Promise
       include: { category: { select: { name: true } } },
     }),
     page === 1 && !catFilter
-      ? prisma.blogPost.findFirst({ orderBy: { publishedAt: "desc" }, include: { category: { select: { name: true } } } })
+      ? prisma.blogPost.findFirst({ where: { isFeatured: true }, orderBy: { publishedAt: "desc" }, include: { category: { select: { name: true } } } })
+        .then(f => f ?? prisma.blogPost.findFirst({ orderBy: { publishedAt: "desc" }, include: { category: { select: { name: true } } } }))
       : Promise.resolve(null),
   ]);
 
