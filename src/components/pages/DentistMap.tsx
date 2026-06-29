@@ -26,6 +26,9 @@ export default function DentistMap() {
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
+    // Guard against Strict Mode double-invoke: container div may already have a Leaflet map
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    if ((containerRef.current as any)._leaflet_id != null) return;
 
     let L: typeof import("leaflet");
 
@@ -119,7 +122,7 @@ export default function DentistMap() {
 
       {/* Selected popup panel */}
       {selected && (
-        <div style={{ position: "absolute", bottom: "calc(24px + env(safe-area-inset-bottom))", left: "50%", transform: "translateX(-50%)", zIndex: 1000, width: "min(420px, calc(100vw - 32px))", background: "#fff", borderRadius: 22, boxShadow: "0 8px 40px rgba(0,0,0,.2)", overflow: "hidden" }}
+        <div style={{ position: "absolute", bottom: "calc(80px + env(safe-area-inset-bottom))", left: "50%", transform: "translateX(-50%)", zIndex: 1000, width: "min(420px, calc(100vw - 32px))", background: "#fff", borderRadius: 22, boxShadow: "0 8px 40px rgba(0,0,0,.2)", overflow: "hidden" }}
           className="map-popup"
         >
           {/* Image strip */}
