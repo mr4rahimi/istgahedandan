@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import RichEditor from "@/components/admin/RichEditor";
 
 interface BlogPost {
   id: number; slug: string; title: string; content: string | null; excerpt: string | null;
@@ -85,7 +86,10 @@ export default function BlogEditForm({ post, categories }: { post: BlogPost | nu
       </div>
       {field("تصویر شاخص (URL)", "featuredImage")}
       {field("خلاصه", "excerpt", "textarea")}
-      {field("محتوا (HTML)", "content", "textarea")}
+      <div>
+        <label style={{ display: "block", fontWeight: 600, fontSize: 13.5, color: "#133b48", marginBottom: 7 }}>محتوا</label>
+        <RichEditor value={form.content} onChange={v => set("content", v)} placeholder="محتوای مقاله را وارد کنید..." minHeight={360} />
+      </div>
       {field("عنوان سئو", "metaTitle")}
       {field("توضیح سئو", "metaDescription", "textarea")}
 

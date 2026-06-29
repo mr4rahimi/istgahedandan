@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import Image from "next/image";
+import RichEditor from "@/components/admin/RichEditor";
 
 interface Dentist {
   id: number; slug: string; title: string; shortDesc: string; longDesc: string;
@@ -133,8 +134,8 @@ export default function DentistEditForm({ dentist }: { dentist: Dentist }) {
         </div>
       </>)}
 
-      {section("توضیحات کامل (HTML)", <>
-        {inp("", "longDesc", "textarea")}
+      {section("توضیحات کامل", <>
+        <RichEditor value={form.longDesc} onChange={v => set("longDesc", v)} placeholder="توضیحات کامل دندانپزشکی را وارد کنید..." minHeight={280} />
       </>)}
 
       {section("سئو", <>

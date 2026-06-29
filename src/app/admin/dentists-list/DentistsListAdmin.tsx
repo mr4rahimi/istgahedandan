@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import RichEditor from "@/components/admin/RichEditor";
 
 interface Location { id: number; title: string; shortTitle: string | null; parentId: number | null }
 interface Dentist { id: number; title: string }
@@ -149,7 +150,7 @@ export default function DentistsListAdmin({ settings, locations, dentists }: Pro
       </div>)}
 
       {/* Long desc */}
-      {section("توضیحات بلند (HTML)", inp("", "dl_long_desc", "textarea"))}
+      {section("توضیحات بلند", <RichEditor value={form.dl_long_desc} onChange={v => set("dl_long_desc", v)} placeholder="توضیحات بلند صفحه لیست دندانپزشکان..." minHeight={240} />)}
 
       {/* FAQs */}
       {section("سوالات متداول", <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>

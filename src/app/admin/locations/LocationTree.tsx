@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import RichEditor from "@/components/admin/RichEditor";
 
 interface Loc {
   id: number; slug: string; title: string; shortTitle: string | null;
@@ -241,7 +242,10 @@ export default function LocationTree({ initialLocations }: Props) {
               </div>
 
               {/* Long Desc */}
-              {textarea("توضیحات بلند صفحه (HTML)", "longDesc", 10, true)}
+              <div>
+                <label style={{ display: "block", fontSize: 12.5, fontWeight: 600, color: "#133b48", marginBottom: 6 }}>توضیحات بلند صفحه</label>
+                <RichEditor value={(form.longDesc as string) ?? ""} onChange={v => setForm(f => ({ ...f, longDesc: v }))} placeholder="توضیحات صفحه منطقه را وارد کنید..." minHeight={200} />
+              </div>
 
               {/* Featured Dentists */}
               <div>
