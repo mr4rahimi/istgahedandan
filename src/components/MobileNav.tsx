@@ -20,8 +20,8 @@ export default function MobileNav() {
   if (!isMobile) return null;
 
   const active = pathname === "/" ? "home"
-    : pathname.startsWith("/خدمات") ? "services"
-    : pathname.startsWith("/دندانپزشکان") ? "dentists"
+    : pathname.startsWith("/services") ? "services"
+    : pathname.startsWith("/dentists-list") ? "dentists"
     : pathname.startsWith("/mag") ? "blog"
     : "";
 
@@ -44,7 +44,7 @@ export default function MobileNav() {
     <>
       <nav style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 1100, direction: "rtl", fontFamily: "inherit", background: "rgba(255,255,255,.92)", backdropFilter: "blur(18px)", WebkitBackdropFilter: "blur(18px)", borderTop: "1px solid #e6eef1", boxShadow: "0 -8px 28px -14px rgba(17,75,107,.3)", padding: "8px 10px calc(8px + env(safe-area-inset-bottom))", display: "flex", alignItems: "flex-end", justifyContent: "space-around" }}>
 
-        <Link href="/دندانپزشکان" style={mk("dentists")}>
+        <Link href="/dentists-list" style={mk("dentists")}>
           <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><circle cx="3.5" cy="6" r="1.4" fill="currentColor" stroke="none" /><circle cx="3.5" cy="12" r="1.4" fill="currentColor" stroke="none" /><circle cx="3.5" cy="18" r="1.4" fill="currentColor" stroke="none" /></svg>
           <span style={{ fontSize: 11, fontWeight: 600 }}>لیست</span>
         </Link>

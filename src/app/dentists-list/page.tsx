@@ -2,6 +2,9 @@ import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
 import type { Metadata } from "next";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
+import MobileNav from "@/components/MobileNav";
 
 async function getSettings() {
   const KEYS = [
@@ -158,6 +161,7 @@ export default async function DentistsListPage() {
 
   return (
     <div style={{ direction: "rtl", fontFamily: "Vazirmatn, system-ui, sans-serif", background: "#f4f9fb", color: "#16313b", minHeight: "100vh", paddingBottom: 80 }}>
+      <Header />
       {/* Hero */}
       <section style={{ background: "linear-gradient(135deg,#0e4d63,#0a2f3e)", color: "#fff", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", top: -90, left: -60, width: 320, height: 320, background: "radial-gradient(circle,rgba(21,184,209,.28),transparent 70%)" }} />
@@ -256,6 +260,8 @@ export default async function DentistsListPage() {
           </div>
         </section>
       )}
+      <Footer />
+      <MobileNav />
     </div>
   );
 }

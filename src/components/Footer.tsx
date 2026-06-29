@@ -82,7 +82,7 @@ export default async function Footer() {
                 </li>
               ))}
               <li>
-                <Link href="/دندانپزشکان" style={{ color: "#15b8d1", textDecoration: "none", fontSize: 14, fontWeight: 600 }}>مشاهده همه ←</Link>
+                <Link href="/dentists-list" style={{ color: "#15b8d1", textDecoration: "none", fontSize: 14, fontWeight: 600 }}>مشاهده همه ←</Link>
               </li>
             </ul>
           </div>

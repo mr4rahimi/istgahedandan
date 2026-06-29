@@ -143,7 +143,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
             <div style={{ fontSize: 60, marginBottom: 20 }}>🔍</div>
             <h2 style={{ fontSize: 24, fontWeight: 800, color: "#133b48", margin: "0 0 12px" }}>نتیجه‌ای پیدا نشد</h2>
             <p style={{ color: "#6c8b95", fontSize: 16, margin: "0 0 28px" }}>عبارت دیگری را امتحان کنید.</p>
-            <Link href="/دندانپزشکان" style={{ background: "linear-gradient(135deg,#15b8d1,#0a6f9e)", color: "#fff", textDecoration: "none", fontWeight: 700, fontSize: 15, padding: "13px 28px", borderRadius: 13 }}>لیست دندانپزشکان</Link>
+            <Link href="/dentists-list" style={{ background: "linear-gradient(135deg,#15b8d1,#0a6f9e)", color: "#fff", textDecoration: "none", fontWeight: 700, fontSize: 15, padding: "13px 28px", borderRadius: 13 }}>لیست دندانپزشکان</Link>
           </div>
         )}
       </div>

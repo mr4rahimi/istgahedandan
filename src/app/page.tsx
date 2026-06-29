@@ -82,7 +82,7 @@ export default async function HomePage() {
             <span style={{ color: "#0c8aa6", fontWeight: 700, fontSize: 14 }}>جدیدترین‌ها</span>
             <h2 style={{ margin: "4px 0 0", fontSize: "clamp(22px,3vw,30px)", fontWeight: 800, color: "#133b48" }}>آخرین دندانپزشکی‌ها</h2>
           </div>
-          <Link href="/دندانپزشکان" style={{ color: "#0c8aa6", textDecoration: "none", fontWeight: 600, fontSize: 14, whiteSpace: "nowrap" }}>مشاهده همه ←</Link>
+          <Link href="/dentists-list" style={{ color: "#0c8aa6", textDecoration: "none", fontWeight: 600, fontSize: 14, whiteSpace: "nowrap" }}>مشاهده همه ←</Link>
         </div>
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(270px, 1fr))", gap: 20 }}>
           {dentists.map((d, i) => {

@@ -13,7 +13,7 @@ export default function NotFound() {
         <p style={{ margin: "0 0 32px", fontSize: 16, color: "#6c8b95", maxWidth: 420, lineHeight: 1.9 }}>صفحه‌ای که دنبال آن می‌گردید وجود ندارد یا منتقل شده است.</p>
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", justifyContent: "center" }}>
           <Link href="/" style={{ background: "linear-gradient(135deg,#15b8d1,#0a6f9e)", color: "#fff", textDecoration: "none", fontWeight: 700, fontSize: 15, padding: "14px 28px", borderRadius: 14 }}>بازگشت به خانه</Link>
-          <Link href="/دندانپزشکان" style={{ background: "#fff", border: "1px solid #d2e8ee", color: "#0c8aa6", textDecoration: "none", fontWeight: 700, fontSize: 15, padding: "14px 28px", borderRadius: 14 }}>لیست دندانپزشکان</Link>
+          <Link href="/dentists-list" style={{ background: "#fff", border: "1px solid #d2e8ee", color: "#0c8aa6", textDecoration: "none", fontWeight: 700, fontSize: 15, padding: "14px 28px", borderRadius: 14 }}>لیست دندانپزشکان</Link>
         </div>
       </section>
       <Footer />

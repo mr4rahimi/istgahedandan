@@ -53,7 +53,7 @@ export default async function ServiceSinglePage({ slug }: { slug: string }) {
             <nav style={{ fontSize: 13, color: "#b9d4dc", marginBottom: 14 }}>
               <Link href="/" style={{ color: "#b9d4dc", textDecoration: "none" }}>خانه</Link>
               {" › "}
-              <Link href="/خدمات" style={{ color: "#b9d4dc", textDecoration: "none" }}>خدمات</Link>
+              <Link href="/services" style={{ color: "#b9d4dc", textDecoration: "none" }}>خدمات</Link>
               {" › "}{service.title}
             </nav>
             <span style={{ display: "inline-block", background: "rgba(255,255,255,.18)", backdropFilter: "blur(6px)", color: "#fff", fontSize: 13, fontWeight: 600, padding: "6px 14px", borderRadius: 30, marginBottom: 14 }}>خدمات تخصصی</span>

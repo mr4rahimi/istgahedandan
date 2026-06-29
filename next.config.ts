@@ -19,8 +19,6 @@ const nextConfig: NextConfig = {
       // Persian-named routes — Next.js 16 doesn't reliably match Unicode directory names
       { source: "/جستجو", destination: "/search" },
       { source: "/جستجو/:path*", destination: "/search/:path*" },
-      { source: "/خدمات", destination: "/services-list" },
-      { source: "/خدمات/:path*", destination: "/services-list/:path*" },
       { source: "/دندانپزشکان", destination: "/dentists-page" },
       { source: "/دندانپزشکان/:path*", destination: "/dentists-page/:path*" },
     ];

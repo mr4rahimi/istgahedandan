@@ -44,7 +44,7 @@ export default function HomeSlider({ slides }: { slides: Slide[] }) {
               <p style={{ margin: "0 0 26px", color: "rgba(255,255,255,.92)", fontSize: "clamp(14px,1.8vw,18px)", lineHeight: 1.9, maxWidth: 480 }}>{sl.text}</p>
               <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
                 <Link href="#reserve" style={{ background: "#fff", color: "#0b5e7a", textDecoration: "none", fontWeight: 700, fontSize: 15, padding: "13px 26px", borderRadius: 13, boxShadow: "0 10px 24px -10px rgba(0,0,0,.4)" }}>{sl.cta}</Link>
-                <Link href="/خدمات" style={{ background: "rgba(255,255,255,.16)", border: "1px solid rgba(255,255,255,.4)", color: "#fff", textDecoration: "none", fontWeight: 600, fontSize: 15, padding: "13px 24px", borderRadius: 13, backdropFilter: "blur(6px)" }}>مشاهده خدمات</Link>
+                <Link href="/services" style={{ background: "rgba(255,255,255,.16)", border: "1px solid rgba(255,255,255,.4)", color: "#fff", textDecoration: "none", fontWeight: 600, fontSize: 15, padding: "13px 24px", borderRadius: 13, backdropFilter: "blur(6px)" }}>مشاهده خدمات</Link>
               </div>
             </div>
           </div>
