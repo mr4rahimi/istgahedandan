@@ -307,7 +307,7 @@ export default async function DentistSinglePage({ slug }: { slug: string }) {
           {/* Map */}
           <div style={{ background: "#fff", border: "1px solid #e7f0f3", borderRadius: 22, overflow: "hidden", boxShadow: "0 16px 40px -32px rgba(13,75,107,.5)", display: "flex", flexDirection: "column" }}>
             <div style={{ padding: "20px 26px 0" }}><h2 style={{ margin: 0, fontSize: 19, fontWeight: 800, color: "#133b48" }}>موقعیت روی نقشه</h2></div>
-            <div style={{ flex: 1, margin: 16, borderRadius: 16, overflow: "hidden", minHeight: 280 }}>
+            <div style={{ height: 300, margin: 16, borderRadius: 16, overflow: "hidden" }}>
               {dentist.mapLat && dentist.mapLng ? (
                 <DentistMap lat={dentist.mapLat} lng={dentist.mapLng} title={dentist.title} />
               ) : (

@@ -50,6 +50,6 @@ export default function DentistMap({ lat, lng, title }: Props) {
   }, [lat, lng, title]);
 
   return (
-    <div ref={ref} style={{ height: "100%", minHeight: 280, borderRadius: 16 }} />
+    <div ref={ref} style={{ width: "100%", height: "100%", borderRadius: 16 }} />
   );
 }
