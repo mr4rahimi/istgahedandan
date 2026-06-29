@@ -40,8 +40,8 @@ export default function DentistReviewForm({ dentistId }: { dentistId: number }) 
               </button>
             ))}
           </div>
-          <input value={name} onChange={e => setName(e.target.value)} placeholder="نام شما (اختیاری)" style={{ width: "100%", marginBottom: 10, border: "none", borderRadius: 12, padding: "12px 14px", fontFamily: "inherit", fontSize: 14, color: "#143945", outline: "none", boxSizing: "border-box" }} />
-          <textarea value={text} onChange={e => setText(e.target.value)} placeholder="نظر شما درباره این مرکز…" style={{ width: "100%", minHeight: 90, resize: "vertical", border: "none", borderRadius: 13, padding: "14px 16px", fontFamily: "inherit", fontSize: 14, color: "#143945", outline: "none", boxSizing: "border-box" }} required />
+          <input value={name} onChange={e => setName(e.target.value)} placeholder="نام شما (اختیاری)" style={{ width: "100%", marginBottom: 10, border: "none", borderRadius: 12, padding: "12px 14px", fontFamily: "inherit", fontSize: 14, color: "#143945", background: "#fff", outline: "none", boxSizing: "border-box" }} />
+          <textarea value={text} onChange={e => setText(e.target.value)} placeholder="نظر شما درباره این مرکز…" style={{ width: "100%", minHeight: 90, resize: "vertical", border: "none", borderRadius: 13, padding: "14px 16px", fontFamily: "inherit", fontSize: 14, color: "#143945", background: "#fff", outline: "none", boxSizing: "border-box" }} required />
           {status === "error" && <p style={{ margin: "8px 0 0", color: "#fca5a5", fontSize: 13 }}>خطا در ثبت نظر. لطفاً دوباره تلاش کنید.</p>}
           <button type="submit" disabled={status === "loading"} style={{ marginTop: 14, background: "#fff", color: "#0b5e7a", border: "none", fontFamily: "inherit", fontWeight: 700, fontSize: 15, padding: "13px 28px", borderRadius: 13, cursor: "pointer", opacity: status === "loading" ? .7 : 1 }}>
             {status === "loading" ? "در حال ثبت…" : "ثبت دیدگاه"}
