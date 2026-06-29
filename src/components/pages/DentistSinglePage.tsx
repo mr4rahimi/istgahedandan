@@ -16,14 +16,31 @@ export default async function DentistSinglePage({ slug }: { slug: string }) {
   const dentist = await prisma.dentist.findUnique({ where: { slug } });
   if (!dentist) notFound();
 
-  const [reviews, faqs, locationLinks, stories, dentistVideos, serviceLinks] = await Promise.all([
+  const [reviews, faqs, dentistLocs, stories, dentistVideos, dentistSvcs] = await Promise.all([
     prisma.review.findMany({ where: { dentistId: dentist.id, approved: true }, orderBy: { createdAt: "desc" } }),
     prisma.fAQ.findMany({ where: { dentistId: dentist.id }, orderBy: { order: "asc" } }),
-    prisma.dentistLocation.findMany({ where: { dentistId: dentist.id }, include: { location: { select: { slug: true, title: true } } } }),
+    prisma.dentistLocation.findMany({ where: { dentistId: dentist.id }, select: { locationId: true } }),
     prisma.dentistStory.findMany({ where: { dentistId: dentist.id }, orderBy: { order: "asc" } }),
     prisma.dentistVideo.findMany({ where: { dentistId: dentist.id }, orderBy: { order: "asc" } }),
-    prisma.dentistService.findMany({ where: { dentistId: dentist.id }, include: { service: { select: { title: true, slug: true } } } }),
+    prisma.dentistService.findMany({ where: { dentistId: dentist.id }, select: { serviceId: true } }),
   ]);
+
+  // Fetch related records separately (Prisma v7 adapter: no include)
+  const locationIds = dentistLocs.map(l => l.locationId);
+  const serviceIds = dentistSvcs.map(s => s.serviceId);
+  const [locationsData, servicesData] = await Promise.all([
+    locationIds.length > 0 ? prisma.location.findMany({ where: { id: { in: locationIds } }, select: { id: true, slug: true, title: true } }) : [],
+    serviceIds.length > 0 ? prisma.service.findMany({ where: { id: { in: serviceIds } }, select: { id: true, slug: true, title: true } }) : [],
+  ]);
+
+  const locationLinks = dentistLocs.map(dl => ({
+    locationId: dl.locationId,
+    location: locationsData.find(l => l.id === dl.locationId) ?? { slug: "", title: "" },
+  }));
+  const serviceLinks = dentistSvcs.map(ds => ({
+    serviceId: ds.serviceId,
+    service: servicesData.find(s => s.id === ds.serviceId) ?? { slug: "", title: "" },
+  }));
 
   const initial = getInitial(dentist.title);
   const reviewCount = reviews.length;
