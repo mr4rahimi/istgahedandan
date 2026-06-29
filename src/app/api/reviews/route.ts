@@ -3,18 +3,24 @@ import { prisma } from "@/lib/prisma";
 
 export async function POST(req: NextRequest) {
   try {
-    const { dentistId, serviceId, rating, name, body } = await req.json() as { dentistId?: number; serviceId?: number; rating?: number; name?: string; body?: string };
-    if (!rating || rating < 1 || rating > 5 || !body?.trim()) {
-      return NextResponse.json({ error: "اطلاعات ناقص" }, { status: 400 });
+    const { dentistId, serviceId, rating, name, body, parentId } = await req.json() as {
+      dentistId?: number; serviceId?: number; rating?: number;
+      name?: string; body?: string; parentId?: number;
+    };
+
+    if (!body?.trim()) {
+      return NextResponse.json({ error: "متن نظر الزامی است" }, { status: 400 });
     }
+
     await prisma.review.create({
       data: {
         dentistId: dentistId || null,
         serviceId: serviceId || null,
-        rating: Number(rating),
+        rating: rating && rating >= 1 && rating <= 5 ? Number(rating) : null,
         authorName: name?.trim() || "ناشناس",
         content: body.trim(),
         approved: false,
+        parentId: parentId || null,
       },
     });
     return NextResponse.json({ ok: true });

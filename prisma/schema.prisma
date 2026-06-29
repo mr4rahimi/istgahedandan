@@ -170,7 +170,10 @@ model Review {
   authorEmail String?
   content     String
   rating      Int?
-  approved    Boolean  @default(true)
+  approved    Boolean  @default(false)
+  parentId    Int?
+  parent      Review?  @relation("ReviewReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies     Review[] @relation("ReviewReplies")
   createdAt   DateTime @default(now())
   wpCommentId Int?     @unique
 }

@@ -10,6 +10,7 @@ import DentistReviewForm from "@/components/DentistReviewForm";
 import DentistStories from "@/components/DentistStories";
 import DentistGallery from "@/components/DentistGallery";
 import DentistVideoSection from "@/components/DentistVideoSection";
+import ReviewReply from "@/components/ReviewReply";
 import { toJalali, getInitial, gradientFromId } from "@/lib/utils";
 
 export default async function DentistSinglePage({ slug }: { slug: string }) {
@@ -17,7 +18,7 @@ export default async function DentistSinglePage({ slug }: { slug: string }) {
   if (!dentist) notFound();
 
   const [reviews, faqs, dentistLocs, stories, dentistVideos, dentistSvcs] = await Promise.all([
-    prisma.review.findMany({ where: { dentistId: dentist.id, approved: true }, orderBy: { createdAt: "desc" } }),
+    prisma.review.findMany({ where: { dentistId: dentist.id, approved: true, parentId: null }, orderBy: { createdAt: "desc" } }),
     prisma.fAQ.findMany({ where: { dentistId: dentist.id }, orderBy: { order: "asc" } }),
     prisma.dentistLocation.findMany({ where: { dentistId: dentist.id }, select: { locationId: true } }),
     prisma.dentistStory.findMany({ where: { dentistId: dentist.id }, orderBy: { order: "asc" } }),
@@ -41,6 +42,18 @@ export default async function DentistSinglePage({ slug }: { slug: string }) {
     serviceId: ds.serviceId,
     service: servicesData.find(s => s.id === ds.serviceId) ?? { slug: "", title: "" },
   }));
+
+  // Fetch approved replies for all reviews
+  const parentIds = reviews.map(r => r.id);
+  const allReplies = parentIds.length > 0
+    ? await prisma.review.findMany({ where: { parentId: { in: parentIds }, approved: true }, orderBy: { createdAt: "asc" } })
+    : [];
+  const repliesMap = new Map<number, typeof allReplies>();
+  for (const rep of allReplies) {
+    if (!rep.parentId) continue;
+    if (!repliesMap.has(rep.parentId)) repliesMap.set(rep.parentId, []);
+    repliesMap.get(rep.parentId)!.push(rep);
+  }
 
   const initial = getInitial(dentist.title);
   const reviewCount = reviews.length;
@@ -318,7 +331,9 @@ export default async function DentistSinglePage({ slug }: { slug: string }) {
             <>
               <h3 style={{ margin: "0 0 18px", fontSize: 18, fontWeight: 700, color: "#133b48" }}>نظرات کاربران</h3>
               <div style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 28 }}>
-                {reviews.slice(0, 10).map((rv, i) => (
+                {reviews.slice(0, 10).map((rv, i) => {
+                  const reviewReplies = repliesMap.get(rv.id) ?? [];
+                  return (
                   <div key={rv.id} style={{ background: "#f7fbfc", border: "1px solid #eef4f6", borderRadius: 16, padding: 18 }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 10 }}>
                       <span style={{ width: 44, height: 44, borderRadius: "50%", background: gradientFromId(i), display: "grid", placeItems: "center", color: "#fff", fontWeight: 700, fontSize: 18 }}>
@@ -326,19 +341,42 @@ export default async function DentistSinglePage({ slug }: { slug: string }) {
                       </span>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontSize: 15, fontWeight: 700, color: "#143945" }}>{rv.authorName || "کاربر"}</div>
-                        <div style={{ display: "flex", gap: 2, marginTop: 3 }}>
-                          {[1, 2, 3, 4, 5].map(s => (
-                            <svg key={s} width="13" height="13" viewBox="0 0 24 24" fill={s <= (rv.rating ?? Math.round(avgRating)) ? "#f5a623" : "#e5e7eb"}>
-                              <path d="M12 2l2.9 6.1 6.6.9-4.8 4.6 1.2 6.5L12 17.8 6.1 20.6l1.2-6.5L2.5 9.5l6.6-.9z" />
-                            </svg>
-                          ))}
-                        </div>
+                        {rv.rating && (
+                          <div style={{ display: "flex", gap: 2, marginTop: 3 }}>
+                            {[1, 2, 3, 4, 5].map(s => (
+                              <svg key={s} width="13" height="13" viewBox="0 0 24 24" fill={s <= rv.rating! ? "#f5a623" : "#e5e7eb"}>
+                                <path d="M12 2l2.9 6.1 6.6.9-4.8 4.6 1.2 6.5L12 17.8 6.1 20.6l1.2-6.5L2.5 9.5l6.6-.9z" />
+                              </svg>
+                            ))}
+                          </div>
+                        )}
                       </div>
                       <span style={{ fontSize: 12.5, color: "#9bb6bf" }}>{toJalali(rv.createdAt)}</span>
                     </div>
-                    {rv.content && <p style={{ margin: 0, fontSize: 14, lineHeight: 1.95, color: "#5e7c85" }}>{rv.content}</p>}
+                    {rv.content && <p style={{ margin: "0 0 10px", fontSize: 14, lineHeight: 1.95, color: "#5e7c85", whiteSpace: "pre-line" }}>{rv.content}</p>}
+
+                    {/* Approved replies */}
+                    {reviewReplies.length > 0 && (
+                      <div style={{ marginTop: 10, marginRight: 20, borderRight: "3px solid #d7eef5", paddingRight: 14, display: "flex", flexDirection: "column", gap: 10 }}>
+                        {reviewReplies.map((rep, j) => (
+                          <div key={rep.id} style={{ background: "#eef7fa", borderRadius: 12, padding: "12px 14px" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
+                              <span style={{ width: 32, height: 32, borderRadius: "50%", background: gradientFromId(i + j + 10), display: "grid", placeItems: "center", color: "#fff", fontWeight: 700, fontSize: 13 }}>
+                                {(rep.authorName || "ک")[0]}
+                              </span>
+                              <span style={{ fontSize: 13.5, fontWeight: 700, color: "#143945" }}>{rep.authorName || "کاربر"}</span>
+                              <span style={{ fontSize: 12, color: "#9bb6bf", marginRight: "auto" }}>{toJalali(rep.createdAt)}</span>
+                            </div>
+                            <p style={{ margin: 0, fontSize: 13.5, lineHeight: 1.85, color: "#4a6e7a", whiteSpace: "pre-line" }}>{rep.content}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+
+                    <ReviewReply dentistId={dentist.id} parentId={rv.id} />
                   </div>
-                ))}
+                  );
+                })}
               </div>
             </>
           )}
