@@ -1,8 +1,11 @@
 "use client";
 
 import { useState, useRef } from "react";
+import dynamic from "next/dynamic";
 import Image from "next/image";
 import RichEditor from "@/components/admin/RichEditor";
+
+const MapPicker = dynamic(() => import("@/components/admin/MapPicker"), { ssr: false, loading: () => <div style={{ height: 320, background: "#eef4f6", borderRadius: 14, display: "grid", placeItems: "center", color: "#9bb6bf" }}>در حال بارگذاری نقشه…</div> });
 
 interface Dentist {
   id: number; slug: string; title: string; shortDesc: string; longDesc: string;
@@ -128,7 +131,12 @@ export default function DentistEditForm({ dentist }: { dentist: Dentist }) {
       </>)}
 
       {section("موقعیت جغرافیایی", <>
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
+        <MapPicker
+          lat={form.mapLat}
+          lng={form.mapLng}
+          onChange={(la, lo) => setForm(f => ({ ...f, mapLat: la, mapLng: lo }))}
+        />
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginTop: 10 }}>
           {inp("عرض جغرافیایی (lat)", "mapLat")}
           {inp("طول جغرافیایی (lng)", "mapLng")}
         </div>
