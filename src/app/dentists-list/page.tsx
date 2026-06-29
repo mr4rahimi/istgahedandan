@@ -5,6 +5,8 @@ import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import MobileNav from "@/components/MobileNav";
+import { breadcrumbSchema, SITE_URL } from "@/lib/seo";
+import JsonLd from "@/components/JsonLd";
 
 async function getSettings() {
   const KEYS = [
@@ -182,8 +184,28 @@ export default async function DentistsListPage() {
     regionDentistsMap.set(loc.id, dList);
   }
 
+  const itemListSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": "لیست دندانپزشکان و کلینیک‌های دندانپزشکی در ایران",
+    "url": `${SITE_URL}/dentists-list`,
+    "numberOfItems": allDentists.length,
+    "itemListElement": allDentists.slice(0, 50).map((d, i) => ({
+      "@type": "ListItem",
+      "position": i + 1,
+      "url": `${SITE_URL}/${d.slug}`,
+      "name": d.title,
+    })),
+  };
+
+  const breadcrumb = breadcrumbSchema([
+    { name: "خانه", url: SITE_URL },
+    { name: "دندانپزشکان", url: `${SITE_URL}/dentists-list` },
+  ]);
+
   return (
     <div style={{ direction: "rtl", fontFamily: "Vazirmatn, system-ui, sans-serif", background: "#f4f9fb", color: "#16313b", minHeight: "100vh", paddingBottom: 80 }}>
+      <JsonLd data={[itemListSchema, breadcrumb]} />
       <Header />
       {/* Hero */}
       <section style={{ background: "linear-gradient(135deg,#0e4d63,#0a2f3e)", color: "#fff", position: "relative", overflow: "hidden" }}>
