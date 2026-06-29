@@ -50,6 +50,11 @@ export default function MobileNav() {
           <span style={{ fontSize: 11, fontWeight: 600 }}>لیست</span>
         </Link>
 
+        <Link href="/map" style={mk("map")}>
+          <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" /><line x1="8" y1="2" x2="8" y2="18" /><line x1="16" y1="6" x2="16" y2="22" /></svg>
+          <span style={{ fontSize: 11, fontWeight: 600 }}>نقشه</span>
+        </Link>
+
         <Link href="#reserve" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, textDecoration: "none", flex: 1, marginTop: -26 }}>
           <span style={{ width: 56, height: 56, borderRadius: 18, background: "linear-gradient(135deg,#17bcd6,#0a6f9e)", display: "grid", placeItems: "center", color: "#fff", boxShadow: "0 12px 24px -8px rgba(13,120,168,.75)", border: "4px solid #fff" }}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><rect x="3" y="5" width="18" height="16" rx="2.5" /><line x1="3" y1="9.5" x2="21" y2="9.5" /><line x1="8" y1="3" x2="8" y2="6" /><line x1="16" y1="3" x2="16" y2="6" /><line x1="12" y1="13" x2="12" y2="17" /><line x1="10" y1="15" x2="14" y2="15" /></svg>
@@ -62,9 +67,9 @@ export default function MobileNav() {
           <span style={{ fontSize: 11, fontWeight: 600 }}>جستجو</span>
         </button>
 
-        <Link href="/map" style={mk("map")}>
-          <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" /><line x1="8" y1="2" x2="8" y2="18" /><line x1="16" y1="6" x2="16" y2="22" /></svg>
-          <span style={{ fontSize: 11, fontWeight: 600 }}>نقشه</span>
+        <Link href="/تماس-با-ما" style={mk("contact")}>
+          <svg width="23" height="23" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.96.36 1.9.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.9.34 1.85.57 2.81.7A2 2 0 0 1 22 16.92z" /></svg>
+          <span style={{ fontSize: 11, fontWeight: 600 }}>تماس</span>
         </Link>
 
       </nav>

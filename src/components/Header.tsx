@@ -9,7 +9,6 @@ const NAV_LINKS = [
   { key: "home", label: "ایستگاه دندان", href: "/" },
   { key: "services", label: "خدمات", href: "/services" },
   { key: "dentists", label: "لیست دندانپزشکی‌ها", href: "/dentists-list" },
-  { key: "map", label: "نقشه", href: "/map" },
   { key: "blog", label: "مقالات", href: "/mag" },
   { key: "about", label: "درباره ما", href: "/درباره-ما" },
   { key: "contact", label: "تماس با ما", href: "/تماس-با-ما" },
@@ -89,6 +88,10 @@ export default function Header() {
               <button onClick={() => setSearchOpen(v => !v)} aria-label="جستجو" style={{ width: 42, height: 42, border: "1px solid #dceaef", background: "#fff", borderRadius: 12, display: "grid", placeItems: "center", cursor: "pointer", color: "#2a4f5b" }}>
                 <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
               </button>
+              <Link href="/map" style={{ display: "inline-flex", alignItems: "center", gap: 7, border: "1.5px solid #c5e2eb", background: pathname.startsWith("/map") ? "#e8f6fa" : "#fff", color: "#0b6e8a", textDecoration: "none", fontWeight: 700, fontSize: 14, padding: "9px 16px", borderRadius: 12, transition: "background .18s" }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" /><line x1="8" y1="2" x2="8" y2="18" /><line x1="16" y1="6" x2="16" y2="22" /></svg>
+                نقشه
+              </Link>
               <Link href="#reserve" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "linear-gradient(135deg,#15b8d1,#0a6f9e)", color: "#fff", textDecoration: "none", fontWeight: 700, fontSize: 15, padding: "11px 20px", borderRadius: 12, boxShadow: "0 8px 20px -8px rgba(13,120,168,.7)" }}>
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><rect x="3" y="5" width="18" height="16" rx="2.5" /><line x1="3" y1="9.5" x2="21" y2="9.5" /><line x1="8" y1="3" x2="8" y2="6" /><line x1="16" y1="3" x2="16" y2="6" /></svg>
                 رزرو نوبت
