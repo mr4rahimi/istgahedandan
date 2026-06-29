@@ -19,7 +19,7 @@ async function getHomeData() {
   const [latestDentists, locations, articles, rawStories, reviews] = await Promise.all([
     prisma.dentist.findMany({
       where: { status: "PUBLISHED" },
-      take: 6,
+      take: 8,
       orderBy: { createdAt: "desc" },
       select: { id: true, slug: true, title: true, shortDesc: true, address: true, featuredImage: true },
     }),
@@ -51,7 +51,7 @@ async function getHomeData() {
   }
   const topIds = [...ratingMap.entries()]
     .sort((a, b) => b[1].count - a[1].count)
-    .slice(0, 6)
+    .slice(0, 8)
     .map(([id]) => id);
 
   const popularDentists = topIds.length > 0
@@ -145,6 +145,30 @@ export default async function HomePage() {
         <HomeSearch locations={locations} />
       </section>
 
+      {/* Map CTA */}
+      <section style={{ maxWidth: 1280, margin: "0 auto", padding: "6px 16px 10px" }}>
+        <div style={{ position: "relative", borderRadius: 28, overflow: "hidden", background: "linear-gradient(135deg,#0b3d4f,#0a5a72)", padding: "clamp(24px,3.5vw,42px) clamp(24px,4vw,56px)", display: "flex", flexWrap: "wrap", alignItems: "center", gap: 28 }}>
+          <div style={{ position: "absolute", top: -60, right: -60, width: 280, height: 280, background: "radial-gradient(circle,rgba(21,184,209,.25),transparent 70%)", pointerEvents: "none" }} />
+          <div style={{ position: "absolute", bottom: -40, left: 40, width: 200, height: 200, background: "radial-gradient(circle,rgba(10,200,140,.15),transparent 70%)", pointerEvents: "none" }} />
+          <div style={{ flex: "0 0 auto", width: "clamp(100px,14vw,160px)", height: "clamp(100px,14vw,160px)", borderRadius: 20, background: "rgba(255,255,255,.1)", border: "1px solid rgba(255,255,255,.15)", display: "grid", placeItems: "center", position: "relative", overflow: "hidden" }}>
+            <div style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(135deg,rgba(255,255,255,.05) 0 12px,rgba(255,255,255,.02) 12px 24px)" }} />
+            <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" strokeWidth="1.4" strokeLinecap="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" /><line x1="8" y1="2" x2="8" y2="18" /><line x1="16" y1="6" x2="16" y2="22" /></svg>
+            <div style={{ position: "absolute", top: "28%", right: "33%", width: 12, height: 12, borderRadius: "50% 50% 50% 0", background: "#15d1a0", transform: "rotate(-45deg)", boxShadow: "0 0 8px rgba(21,209,160,.7)" }} />
+            <div style={{ position: "absolute", top: "55%", left: "28%", width: 10, height: 10, borderRadius: "50% 50% 50% 0", background: "#15b8d1", transform: "rotate(-45deg)", boxShadow: "0 0 6px rgba(21,184,209,.6)" }} />
+            <div style={{ position: "absolute", bottom: "24%", right: "23%", width: 9, height: 9, borderRadius: "50% 50% 50% 0", background: "#fff", transform: "rotate(-45deg)", opacity: 0.7 }} />
+          </div>
+          <div style={{ flex: "1 1 220px" }}>
+            <span style={{ color: "#5fdcf0", fontWeight: 700, fontSize: 13 }}>نقشه تعاملی</span>
+            <h2 style={{ margin: "6px 0 10px", fontSize: "clamp(19px,2.8vw,30px)", fontWeight: 800, color: "#fff", lineHeight: 1.35 }}>دندانپزشک نزدیک خود را روی نقشه پیدا کنید</h2>
+            <p style={{ margin: "0 0 20px", fontSize: 14, color: "#b9d9e4", lineHeight: 1.9 }}>موقعیت مطب‌ها را روی نقشه ببینید و نزدیک‌ترین گزینه را انتخاب کنید.</p>
+            <Link href="/map" style={{ display: "inline-flex", alignItems: "center", gap: 9, background: "#fff", color: "#0b5e7a", textDecoration: "none", fontWeight: 700, fontSize: 14, padding: "11px 22px", borderRadius: 12, boxShadow: "0 10px 24px -10px rgba(0,0,0,.4)" }}>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" /><line x1="8" y1="2" x2="8" y2="18" /><line x1="16" y1="6" x2="16" y2="22" /></svg>
+              مشاهده نقشه
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* Latest Dentists */}
       <section style={{ maxWidth: 1280, margin: "0 auto", padding: "30px 16px" }}>
         <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 22, gap: 12 }}>
@@ -174,37 +198,6 @@ export default async function HomePage() {
           </div>
         </section>
       )}
-
-      {/* Map CTA */}
-      <section style={{ maxWidth: 1280, margin: "0 auto", padding: "0 16px 40px" }}>
-        <div style={{ position: "relative", borderRadius: 28, overflow: "hidden", background: "linear-gradient(135deg,#0b3d4f,#0a5a72)", padding: "clamp(28px,4vw,50px) clamp(24px,4vw,56px)", display: "flex", flexWrap: "wrap", alignItems: "center", gap: 32 }}>
-          <div style={{ position: "absolute", top: -60, right: -60, width: 280, height: 280, background: "radial-gradient(circle,rgba(21,184,209,.25),transparent 70%)", pointerEvents: "none" }} />
-          <div style={{ position: "absolute", bottom: -40, left: 40, width: 200, height: 200, background: "radial-gradient(circle,rgba(10,200,140,.15),transparent 70%)", pointerEvents: "none" }} />
-
-          {/* Map preview illustration */}
-          <div style={{ flex: "0 0 auto", width: "clamp(120px,18vw,190px)", height: "clamp(120px,18vw,190px)", borderRadius: 22, background: "rgba(255,255,255,.1)", border: "1px solid rgba(255,255,255,.15)", display: "grid", placeItems: "center", position: "relative", overflow: "hidden" }}>
-            <div style={{ position: "absolute", inset: 0, background: "repeating-linear-gradient(135deg,rgba(255,255,255,.05) 0 12px,rgba(255,255,255,.02) 12px 24px)" }} />
-            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,.7)" strokeWidth="1.4" strokeLinecap="round">
-              <polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" />
-              <line x1="8" y1="2" x2="8" y2="18" />
-              <line x1="16" y1="6" x2="16" y2="22" />
-            </svg>
-            <div style={{ position: "absolute", top: "30%", right: "35%", width: 14, height: 14, borderRadius: "50% 50% 50% 0", background: "#15d1a0", transform: "rotate(-45deg)", boxShadow: "0 0 8px rgba(21,209,160,.6)" }} />
-            <div style={{ position: "absolute", top: "55%", left: "30%", width: 11, height: 11, borderRadius: "50% 50% 50% 0", background: "#15b8d1", transform: "rotate(-45deg)", boxShadow: "0 0 6px rgba(21,184,209,.6)" }} />
-            <div style={{ position: "absolute", bottom: "25%", right: "25%", width: 10, height: 10, borderRadius: "50% 50% 50% 0", background: "#fff", transform: "rotate(-45deg)", opacity: 0.7 }} />
-          </div>
-
-          <div style={{ flex: "1 1 260px" }}>
-            <span style={{ color: "#5fdcf0", fontWeight: 700, fontSize: 14 }}>نقشه تعاملی</span>
-            <h2 style={{ margin: "8px 0 12px", fontSize: "clamp(22px,3.2vw,34px)", fontWeight: 800, color: "#fff", lineHeight: 1.35 }}>دندانپزشک نزدیک خود را روی نقشه پیدا کنید</h2>
-            <p style={{ margin: "0 0 24px", fontSize: 15, color: "#b9d9e4", lineHeight: 2 }}>تمام دندانپزشکی‌های ثبت‌شده را روی نقشه ببینید، موقعیت مطب را بررسی کنید و نزدیک‌ترین گزینه را انتخاب کنید.</p>
-            <Link href="/map" style={{ display: "inline-flex", alignItems: "center", gap: 10, background: "#fff", color: "#0b5e7a", textDecoration: "none", fontWeight: 700, fontSize: 15, padding: "13px 26px", borderRadius: 13, boxShadow: "0 10px 24px -10px rgba(0,0,0,.4)" }}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" /><line x1="8" y1="2" x2="8" y2="18" /><line x1="16" y1="6" x2="16" y2="22" /></svg>
-              مشاهده نقشه
-            </Link>
-          </div>
-        </div>
-      </section>
 
       {/* About */}
       <section id="about" style={{ maxWidth: 1280, margin: "0 auto", padding: "0 16px 20px" }}>
