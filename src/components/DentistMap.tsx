@@ -41,6 +41,9 @@ export default function DentistMap({ lat, lng, title }: Props) {
       });
 
       L.marker([lat, lng], { icon }).addTo(map).bindPopup(title).openPopup();
+
+      // Force Leaflet to recalculate container size after layout is settled
+      setTimeout(() => map.invalidateSize(), 0);
     });
 
     return () => {
