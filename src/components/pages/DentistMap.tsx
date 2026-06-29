@@ -28,13 +28,13 @@ export default function DentistMap() {
     if (!containerRef.current || mapRef.current) return;
 
     let L: typeof import("leaflet");
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    let MC: any;
 
-    Promise.all([import("leaflet"), import("leaflet.markercluster")]).then(([leafletMod]) => {
+    import("leaflet").then(async (leafletMod) => {
       L = leafletMod.default ?? leafletMod;
+      // markercluster is a plugin that expects global L — set it before importing
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      MC = (window as any).L ?? L;
+      (window as any).L = L;
+      await import("leaflet.markercluster");
 
       // Fix icon paths
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
