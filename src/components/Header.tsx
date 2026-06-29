@@ -100,7 +100,7 @@ export default function Header() {
           )}
 
           {isMobile && (
-            <button onClick={() => setMenuOpen(v => !v)} aria-label="منو" style={{ order: 3, width: 44, height: 44, border: "1px solid #dceaef", background: "#fff", borderRadius: 12, display: "grid", placeItems: "center", cursor: "pointer", color: "#133b48", marginLeft: 0 }}>
+            <button onClick={() => setMenuOpen(v => !v)} aria-label="منو" style={{ order: 3, width: 44, height: 44, border: "1px solid #dceaef", background: "#fff", borderRadius: 12, display: "grid", placeItems: "center", cursor: "pointer", color: "#133b48", marginLeft: "auto" }}>
               <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.3" strokeLinecap="round"><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
             </button>
           )}
