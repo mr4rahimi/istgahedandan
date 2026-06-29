@@ -39,11 +39,11 @@ export async function PUT(req: NextRequest) {
       workingHours: safe.workingHours ?? null,
       mapLat: safe.mapLat ?? null,
       mapLng: safe.mapLng ?? null,
+      centerCode: safe.centerCode ?? null,
       featuredImage: safe.featuredImage ?? null,
       gallery: safe.gallery ?? [],
       metaTitle: safe.metaTitle ?? null,
       metaDescription: safe.metaDescription ?? null,
-      socialLinks: safe.socialLinks ?? null,
     },
   });
 

@@ -1,21 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
+import dynamic from "next/dynamic";
+import Image from "next/image";
+import RichEditor from "@/components/admin/RichEditor";
+import DentistMediaManager from "./DentistMediaManager";
+
+const MapPicker = dynamic(() => import("@/components/admin/MapPicker"), {
+  ssr: false,
+  loading: () => <div style={{ height: 320, background: "#eef4f6", borderRadius: 14, display: "grid", placeItems: "center", color: "#9bb6bf" }}>در حال بارگذاری نقشه…</div>,
+});
 
 interface Dentist {
   id: number; title: string; shortDesc: string | null; longDesc: string | null;
   address: string | null; phones: string[]; whatsapp: string | null;
   telegram: string | null; instagram: string | null; workingHours: string | null;
-  mapLat: number | null; mapLng: number | null; featuredImage: string | null;
-  gallery: string[]; metaTitle: string | null; metaDescription: string | null;
-  faqs: { id: number; question: string; answer: string; order: number }[];
+  mapLat: number | null; mapLng: number | null; centerCode: string | null;
+  featuredImage: string | null; gallery: string[];
+  metaTitle: string | null; metaDescription: string | null;
+  dentistVideos?: { id: number; url: string; title: string; order: number }[];
 }
 
+const TABS = [
+  { key: "info", label: "اطلاعات اصلی" },
+  { key: "contact", label: "تماس و موقعیت" },
+  { key: "gallery", label: "گالری" },
+  { key: "videos", label: "ویدئوها" },
+  { key: "seo", label: "سئو" },
+] as const;
+type Tab = typeof TABS[number]["key"];
+
 export default function DentistProfileForm({ dentist }: { dentist: Dentist }) {
+  const [tab, setTab] = useState<Tab>("info");
   const [form, setForm] = useState({
     title: dentist.title,
     shortDesc: dentist.shortDesc || "",
     longDesc: dentist.longDesc || "",
+    centerCode: dentist.centerCode || "",
     address: dentist.address || "",
     phones: dentist.phones.join("\n"),
     whatsapp: dentist.whatsapp || "",
@@ -28,17 +49,24 @@ export default function DentistProfileForm({ dentist }: { dentist: Dentist }) {
     metaTitle: dentist.metaTitle || "",
     metaDescription: dentist.metaDescription || "",
   });
-
   const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [error, setError] = useState("");
-  const [tab, setTab] = useState<"basic" | "contact" | "seo">("basic");
+  const [msg, setMsg] = useState("");
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
-  const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
-    setForm(f => ({ ...f, [k]: e.target.value }));
+  const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }));
+
+  const uploadFeatured = async (file: File) => {
+    setUploading(true);
+    const fd = new FormData(); fd.append("file", file);
+    const res = await fetch("/api/dentist/upload", { method: "POST", body: fd });
+    const data = await res.json();
+    setUploading(false);
+    if (data.url) set("featuredImage", data.url);
+  };
 
   const handleSave = async () => {
-    setSaving(true); setError(""); setSaved(false);
+    setSaving(true); setMsg("");
     const res = await fetch("/api/dentist/profile", {
       method: "PUT", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -48,119 +76,148 @@ export default function DentistProfileForm({ dentist }: { dentist: Dentist }) {
         mapLng: form.mapLng ? parseFloat(form.mapLng) : null,
       }),
     });
-    const data = await res.json();
     setSaving(false);
-    if (!res.ok) { setError(data.error || "خطا"); return; }
-    setSaved(true);
-    setTimeout(() => setSaved(false), 3000);
+    setMsg(res.ok ? "ذخیره شد ✓" : "خطا در ذخیره‌سازی");
+    setTimeout(() => setMsg(""), 3000);
   };
 
-  const inputStyle: React.CSSProperties = { width: "100%", border: "1.5px solid #dceaef", borderRadius: 12, padding: "11px 14px", fontSize: 14.5, fontFamily: "inherit", outline: "none", boxSizing: "border-box", background: "#f8fbfc" };
-  const labelStyle: React.CSSProperties = { display: "block", fontSize: 13, fontWeight: 600, color: "#2a4f5b", marginBottom: 6 };
+  const inp = (label: string, key: string, type: "text" | "textarea" = "text") => (
+    <div key={key}>
+      <label style={{ display: "block", fontWeight: 600, fontSize: 13.5, color: "#133b48", marginBottom: 7 }}>{label}</label>
+      {type === "textarea" ? (
+        <textarea value={(form as Record<string, string>)[key]} onChange={e => set(key, e.target.value)} rows={3} style={{ width: "100%", padding: "10px 12px", border: "1px solid #dceaef", borderRadius: 10, fontFamily: "inherit", fontSize: 14, outline: "none", resize: "vertical", boxSizing: "border-box" }} />
+      ) : (
+        <input type="text" value={(form as Record<string, string>)[key]} onChange={e => set(key, e.target.value)} style={{ width: "100%", padding: "10px 12px", border: "1px solid #dceaef", borderRadius: 10, fontFamily: "inherit", fontSize: 14, outline: "none", boxSizing: "border-box" }} />
+      )}
+    </div>
+  );
 
-  const TABS = [
-    { key: "basic", label: "اطلاعات اصلی" },
-    { key: "contact", label: "تماس و موقعیت" },
-    { key: "seo", label: "SEO" },
-  ] as const;
+  const section = (title: string, children: React.ReactNode) => (
+    <div style={{ background: "#fff", border: "1px solid #e7f0f3", borderRadius: 16, padding: 22, boxShadow: "0 4px 20px -8px rgba(13,75,107,.12)", marginBottom: 18 }}>
+      <h3 style={{ margin: "0 0 16px", fontSize: 16, fontWeight: 700, color: "#133b48" }}>{title}</h3>
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>{children}</div>
+    </div>
+  );
+
+  const showSaveBtn = tab === "info" || tab === "contact" || tab === "seo";
 
   return (
-    <div style={{ maxWidth: 800 }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
+    <div style={{ maxWidth: 860 }}>
+      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: "wrap", gap: 12 }}>
         <h1 style={{ margin: 0, fontSize: 24, fontWeight: 800, color: "#133b48" }}>ویرایش پروفایل</h1>
-        <button onClick={handleSave} disabled={saving} style={{ background: "linear-gradient(135deg,#0c8aa6,#0a4f63)", color: "#fff", border: "none", borderRadius: 12, padding: "11px 24px", fontSize: 15, fontWeight: 700, fontFamily: "inherit", cursor: "pointer", boxShadow: "0 6px 16px -4px rgba(12,138,166,.5)" }}>
-          {saving ? "در حال ذخیره…" : saved ? "✓ ذخیره شد" : "ذخیره تغییرات"}
-        </button>
+        {showSaveBtn && (
+          <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+            {msg && <span style={{ fontWeight: 600, fontSize: 14, color: msg.includes("خطا") ? "#dc2626" : "#16a34a" }}>{msg}</span>}
+            <button onClick={handleSave} disabled={saving} style={{ background: "linear-gradient(135deg,#0c8aa6,#0a4f63)", color: "#fff", border: "none", borderRadius: 12, padding: "11px 24px", fontSize: 15, fontWeight: 700, fontFamily: "inherit", cursor: "pointer", opacity: saving ? .7 : 1 }}>
+              {saving ? "در حال ذخیره…" : "ذخیره تغییرات"}
+            </button>
+          </div>
+        )}
       </div>
 
-      {error && <div style={{ background: "#fff1f1", border: "1px solid #fcc", borderRadius: 12, padding: "12px 16px", marginBottom: 16, fontSize: 14, color: "#c0392b" }}>{error}</div>}
-      {saved && <div style={{ background: "#f0fdf4", border: "1px solid #bbf7d0", borderRadius: 12, padding: "12px 16px", marginBottom: 16, fontSize: 14, color: "#16a34a" }}>تغییرات با موفقیت ذخیره شد</div>}
-
       {/* Tabs */}
-      <div style={{ display: "flex", gap: 4, background: "#f0f6f8", borderRadius: 14, padding: 4, marginBottom: 24 }}>
+      <div style={{ display: "flex", gap: 0, marginBottom: 24, borderBottom: "2px solid #e7f0f3", overflowX: "auto" }}>
         {TABS.map(t => (
-          <button key={t.key} onClick={() => setTab(t.key)} style={{ flex: 1, border: "none", borderRadius: 10, padding: "10px", fontFamily: "inherit", fontSize: 14, fontWeight: 600, cursor: "pointer", background: tab === t.key ? "#fff" : "transparent", color: tab === t.key ? "#0c8aa6" : "#6c8b95", boxShadow: tab === t.key ? "0 2px 8px rgba(0,0,0,.08)" : "none", transition: "all .15s" }}>
+          <button key={t.key} onClick={() => setTab(t.key)} style={{ padding: "11px 20px", border: "none", background: "transparent", fontFamily: "inherit", fontWeight: 700, fontSize: 14, cursor: "pointer", color: tab === t.key ? "#0c8aa6" : "#6c8b95", borderBottom: `2px solid ${tab === t.key ? "#0c8aa6" : "transparent"}`, marginBottom: -2, whiteSpace: "nowrap" }}>
             {t.label}
           </button>
         ))}
       </div>
 
-      <div style={{ background: "#fff", borderRadius: 20, padding: "28px", border: "1px solid #e7f0f3", boxShadow: "0 4px 20px -8px rgba(13,75,107,.12)", display: "flex", flexDirection: "column", gap: 18 }}>
-
-        {tab === "basic" && <>
-          <div>
-            <label style={labelStyle}>نام کلینیک / دندانپزشکی</label>
-            <input value={form.title} onChange={set("title")} style={inputStyle} />
-          </div>
-          <div>
-            <label style={labelStyle}>توضیح کوتاه</label>
-            <textarea value={form.shortDesc} onChange={set("shortDesc")} rows={3} style={{ ...inputStyle, resize: "vertical" }} />
-          </div>
-          <div>
-            <label style={labelStyle}>توضیحات کامل</label>
-            <textarea value={form.longDesc} onChange={set("longDesc")} rows={8} style={{ ...inputStyle, resize: "vertical" }} />
-          </div>
-          <div>
-            <label style={labelStyle}>تصویر اصلی (URL)</label>
-            <input value={form.featuredImage} onChange={set("featuredImage")} placeholder="https://..." style={{ ...inputStyle, direction: "ltr" }} />
-            {form.featuredImage && (
-              <img src={form.featuredImage} alt="" style={{ marginTop: 10, height: 100, borderRadius: 10, objectFit: "cover" }} />
-            )}
-          </div>
-          <div>
-            <label style={labelStyle}>ساعات کاری</label>
-            <textarea value={form.workingHours} onChange={set("workingHours")} rows={4} placeholder="شنبه تا چهارشنبه: ۹ تا ۲۰&#10;پنجشنبه: ۹ تا ۱۴" style={{ ...inputStyle, resize: "vertical" }} />
-          </div>
-        </>}
-
-        {tab === "contact" && <>
-          <div>
-            <label style={labelStyle}>آدرس</label>
-            <textarea value={form.address} onChange={set("address")} rows={3} style={{ ...inputStyle, resize: "vertical" }} />
-          </div>
-          <div>
-            <label style={labelStyle}>شماره‌های تماس (هر شماره در یک خط)</label>
-            <textarea value={form.phones} onChange={set("phones")} rows={3} placeholder="021-12345678&#10;09123456789" style={{ ...inputStyle, direction: "ltr", resize: "vertical" }} />
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
-            <div>
-              <label style={labelStyle}>واتساپ</label>
-              <input value={form.whatsapp} onChange={set("whatsapp")} placeholder="09..." style={{ ...inputStyle, direction: "ltr" }} />
-            </div>
-            <div>
-              <label style={labelStyle}>تلگرام</label>
-              <input value={form.telegram} onChange={set("telegram")} placeholder="@username" style={{ ...inputStyle, direction: "ltr" }} />
-            </div>
-            <div>
-              <label style={labelStyle}>اینستاگرام</label>
-              <input value={form.instagram} onChange={set("instagram")} placeholder="@username" style={{ ...inputStyle, direction: "ltr" }} />
-            </div>
-          </div>
+      {/* Info */}
+      {tab === "info" && <>
+        {section("اطلاعات پایه", <>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14 }}>
-            <div>
-              <label style={labelStyle}>عرض جغرافیایی (Lat)</label>
-              <input value={form.mapLat} onChange={set("mapLat")} placeholder="35.123456" type="number" step="any" style={{ ...inputStyle, direction: "ltr" }} />
-            </div>
-            <div>
-              <label style={labelStyle}>طول جغرافیایی (Lng)</label>
-              <input value={form.mapLng} onChange={set("mapLng")} placeholder="51.123456" type="number" step="any" style={{ ...inputStyle, direction: "ltr" }} />
-            </div>
+            {inp("نام کلینیک / دندانپزشکی", "title")}
+            {inp("کد مرکز", "centerCode")}
           </div>
-        </>}
+          {inp("توضیح کوتاه", "shortDesc", "textarea")}
+        </>)}
 
-        {tab === "seo" && <>
-          <div>
-            <label style={labelStyle}>عنوان متا (Meta Title)</label>
-            <input value={form.metaTitle} onChange={set("metaTitle")} style={{ ...inputStyle, direction: "ltr" }} />
-            <div style={{ fontSize: 12, color: "#9bb6bf", marginTop: 5 }}>{form.metaTitle.length} / 60 کاراکتر</div>
+        {section("تصویر شاخص", <>
+          {form.featuredImage && (
+            <div style={{ width: 200, height: 120, borderRadius: 12, overflow: "hidden", position: "relative", background: "#eef4f6" }}>
+              <Image src={form.featuredImage} alt="تصویر شاخص" fill style={{ objectFit: "cover" }} />
+            </div>
+          )}
+          <div style={{ display: "flex", gap: 8 }}>
+            <input value={form.featuredImage} onChange={e => set("featuredImage", e.target.value)} placeholder="لینک تصویر" style={{ flex: 1, padding: "10px 12px", border: "1px solid #dceaef", borderRadius: 10, fontFamily: "inherit", fontSize: 14, outline: "none", direction: "ltr" }} />
+            <input ref={fileRef} type="file" accept="image/*" style={{ display: "none" }} onChange={e => { const f = e.target.files?.[0]; if (f) uploadFeatured(f); }} />
+            <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading} style={{ padding: "0 16px", border: "1px solid #dceaef", borderRadius: 10, background: "#f8fbfc", fontFamily: "inherit", fontSize: 13.5, fontWeight: 600, color: "#2a4f5b", cursor: "pointer", whiteSpace: "nowrap" }}>
+              {uploading ? "…" : "آپلود"}
+            </button>
           </div>
-          <div>
-            <label style={labelStyle}>توضیحات متا (Meta Description)</label>
-            <textarea value={form.metaDescription} onChange={set("metaDescription")} rows={3} style={{ ...inputStyle, direction: "ltr", resize: "vertical" }} />
-            <div style={{ fontSize: 12, color: "#9bb6bf", marginTop: 5 }}>{form.metaDescription.length} / 160 کاراکتر</div>
+        </>)}
+
+        {section("توضیحات کامل", <>
+          <RichEditor value={form.longDesc} onChange={v => set("longDesc", v)} placeholder="توضیحات کامل دندانپزشکی را وارد کنید..." minHeight={300} />
+        </>)}
+
+        {section("ساعات کاری", <>
+          {inp("ساعات کاری (هر روز در یک خط)", "workingHours", "textarea")}
+        </>)}
+      </>}
+
+      {/* Contact */}
+      {tab === "contact" && <>
+        {section("اطلاعات تماس", <>
+          {inp("شماره‌های تماس (هر شماره در یک خط)", "phones", "textarea")}
+          {inp("آدرس کامل", "address", "textarea")}
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: 14 }}>
+            {inp("واتساپ", "whatsapp")}
+            {inp("تلگرام", "telegram")}
+            {inp("اینستاگرام", "instagram")}
           </div>
-        </>}
-      </div>
+        </>)}
+
+        {section("موقعیت روی نقشه", <>
+          <MapPicker
+            lat={form.mapLat}
+            lng={form.mapLng}
+            onChange={(la, lo) => setForm(f => ({ ...f, mapLat: la, mapLng: lo }))}
+          />
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginTop: 4 }}>
+            {inp("عرض جغرافیایی (lat)", "mapLat")}
+            {inp("طول جغرافیایی (lng)", "mapLng")}
+          </div>
+        </>)}
+      </>}
+
+      {/* Gallery */}
+      {tab === "gallery" && (
+        <DentistMediaManager
+          type="gallery"
+          initialItems={dentist.gallery.map((url, i) => ({ id: i, url, title: "" }))}
+          titleLabel="" urlLabel="لینک تصویر" addLabel="+ تصویر جدید"
+          noTitle
+          saveEndpoint="/api/dentist/gallery"
+          saveBody={(items) => ({ gallery: items.map(i => i.url) })}
+          uploadEndpoint="/api/dentist/upload"
+        />
+      )}
+
+      {/* Videos */}
+      {tab === "videos" && (
+        <DentistMediaManager
+          type="videos"
+          initialItems={(dentist.dentistVideos || []).map(v => ({ id: v.id, url: v.url, title: v.title }))}
+          titleLabel="عنوان ویدئو" urlLabel="لینک ویدئو" addLabel="+ ویدئو جدید"
+          saveEndpoint="/api/dentist/videos"
+          saveBody={(items) => items.map(i => ({ url: i.url, title: i.title }))}
+          uploadEndpoint="/api/dentist/upload"
+          accept="image/*,video/mp4,video/webm"
+        />
+      )}
+
+      {/* SEO */}
+      {tab === "seo" && <>
+        {section("سئو", <>
+          {inp("عنوان متا (Meta Title)", "metaTitle")}
+          <div style={{ fontSize: 12, color: form.metaTitle.length > 60 ? "#dc2626" : "#9bb6bf", marginTop: -10 }}>{form.metaTitle.length} / 60 کاراکتر</div>
+          {inp("توضیحات متا (Meta Description)", "metaDescription", "textarea")}
+          <div style={{ fontSize: 12, color: form.metaDescription.length > 160 ? "#dc2626" : "#9bb6bf", marginTop: -10 }}>{form.metaDescription.length} / 160 کاراکتر</div>
+        </>)}
+      </>}
     </div>
   );
 }
