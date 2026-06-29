@@ -27,48 +27,71 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-function StarRating({ rating }: { rating: number }) {
-  return (
-    <span style={{ display: "inline-flex", alignItems: "center", gap: 3, background: "#fff6e6", color: "#d98a00", fontSize: 12, fontWeight: 700, padding: "3px 8px", borderRadius: 7 }}>
-      <svg width="12" height="12" viewBox="0 0 24 24" fill="#f5a623"><path d="M12 2l2.9 6.1 6.6.9-4.8 4.6 1.2 6.5L12 17.8 6.1 20.6l1.2-6.5L2.5 9.5l6.6-.9z" /></svg>
-      {rating.toFixed(1)}
-    </span>
-  );
-}
-
 interface DentistCard {
   id: number; slug: string; title: string; shortDesc: string | null;
   featuredImage: string | null; address: string | null;
   avgRating: number | null; reviewCount: number;
 }
 
-function DentistCardEl({ d }: { d: DentistCard }) {
+const CARD_GRADIENTS = [
+  "linear-gradient(135deg,#0c8aa6,#0a4f63)",
+  "linear-gradient(135deg,#0a6f9e,#5b2171)",
+  "linear-gradient(135deg,#0a8f86,#0a3f54)",
+  "linear-gradient(135deg,#8b5cf6,#0c5e7c)",
+  "linear-gradient(135deg,#0ea5e9,#0a3f54)",
+];
+
+function DentistCardEl({ d, idx = 0 }: { d: DentistCard; idx?: number }) {
   const initial = d.title[0] || "د";
+  const gradient = CARD_GRADIENTS[idx % CARD_GRADIENTS.length];
   return (
-    <Link href={`/${d.slug}`} style={{ textDecoration: "none", background: "#fff", border: "1px solid #e7f0f3", borderRadius: 20, padding: 18, boxShadow: "0 14px 34px -28px rgba(13,75,107,.5)", display: "block", color: "inherit" }}>
-      <div style={{ display: "flex", gap: 14, alignItems: "flex-start" }}>
+    <div style={{ background: "#fff", border: "1px solid #e7f0f3", borderRadius: 22, overflow: "hidden", boxShadow: "0 4px 24px -8px rgba(13,75,107,.18)", display: "flex", flexDirection: "column", transition: "box-shadow .2s" }}>
+      {/* Image */}
+      <div style={{ position: "relative", height: 172, flexShrink: 0, background: gradient, overflow: "hidden" }}>
         {d.featuredImage ? (
-          <Image src={d.featuredImage} alt={d.title} width={64} height={64} style={{ borderRadius: 18, objectFit: "cover", flexShrink: 0 }} />
+          <Image src={d.featuredImage} alt={d.title} fill style={{ objectFit: "cover" }} sizes="(max-width:640px) 100vw, 320px" />
         ) : (
-          <span style={{ width: 64, height: 64, borderRadius: 18, flexShrink: 0, background: "linear-gradient(135deg,#0c8aa6,#0e4d63)", display: "grid", placeItems: "center", color: "#fff", fontWeight: 800, fontSize: 24 }}>{initial}</span>
-        )}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <h3 style={{ margin: "0 0 4px", fontSize: 16.5, fontWeight: 700, color: "#143945" }}>{d.title}</h3>
-          <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap", marginBottom: 8 }}>
-            {d.avgRating && d.avgRating > 0 ? <StarRating rating={d.avgRating} /> : null}
-            <span style={{ color: "#6c8b95", fontSize: 12.5 }}>{d.reviewCount} نظر</span>
+          <div style={{ width: "100%", height: "100%", display: "grid", placeItems: "center" }}>
+            <span style={{ width: 72, height: 72, borderRadius: "50%", background: "rgba(255,255,255,.18)", display: "grid", placeItems: "center", color: "#fff", fontWeight: 800, fontSize: 30 }}>{initial}</span>
           </div>
-        </div>
+        )}
+        <div style={{ position: "absolute", inset: 0, background: "linear-gradient(180deg,transparent 40%,rgba(10,40,55,.65))" }} />
+        {d.avgRating && d.avgRating > 0 && (
+          <div style={{ position: "absolute", top: 12, right: 12, display: "flex", alignItems: "center", gap: 4, background: "rgba(0,0,0,.45)", backdropFilter: "blur(8px)", color: "#fbbf24", fontSize: 13, fontWeight: 800, padding: "4px 10px", borderRadius: 20 }}>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="#fbbf24"><path d="M12 2l2.9 6.1 6.6.9-4.8 4.6 1.2 6.5L12 17.8 6.1 20.6l1.2-6.5L2.5 9.5l6.6-.9z" /></svg>
+            {d.avgRating.toFixed(1)}
+          </div>
+        )}
+        {d.reviewCount > 0 && (
+          <div style={{ position: "absolute", top: 12, left: 12, background: "rgba(0,0,0,.45)", backdropFilter: "blur(8px)", color: "#e2f4f8", fontSize: 12, fontWeight: 600, padding: "4px 10px", borderRadius: 20 }}>
+            {d.reviewCount} نظر
+          </div>
+        )}
       </div>
-      {d.shortDesc && <p style={{ margin: "12px 0", fontSize: 13.5, lineHeight: 1.9, color: "#5e7c85" }}>{d.shortDesc.slice(0, 120)}{d.shortDesc.length > 120 ? "…" : ""}</p>}
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", paddingTop: 12, borderTop: "1px solid #eef4f6" }}>
-        <span style={{ display: "inline-flex", alignItems: "center", gap: 5, color: "#6c8b95", fontSize: 13 }}>
-          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9bb6bf" strokeWidth="2" strokeLinecap="round"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg>
-          {d.address || "تهران"}
-        </span>
-        <span style={{ color: "#0c8aa6", fontWeight: 700, fontSize: 13.5 }}>پروفایل ←</span>
+
+      {/* Body */}
+      <div style={{ padding: "16px 18px 18px", display: "flex", flexDirection: "column", flex: 1, gap: 8 }}>
+        <h3 style={{ margin: 0, fontSize: 16, fontWeight: 800, color: "#143945", lineHeight: 1.5 }}>{d.title}</h3>
+
+        {d.address && (
+          <p style={{ margin: 0, display: "flex", alignItems: "flex-start", gap: 5, color: "#7a9faa", fontSize: 12.5, lineHeight: 1.7 }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" style={{ flexShrink: 0, marginTop: 2 }}><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0118 0z" /><circle cx="12" cy="10" r="3" /></svg>
+            {d.address.slice(0, 60)}{d.address.length > 60 ? "…" : ""}
+          </p>
+        )}
+
+        {d.shortDesc && (
+          <p style={{ margin: 0, fontSize: 13, lineHeight: 1.85, color: "#6c8b95", flex: 1 }}>
+            {d.shortDesc.slice(0, 90)}{d.shortDesc.length > 90 ? "…" : ""}
+          </p>
+        )}
+
+        <Link href={`/${d.slug}`} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, marginTop: 6, padding: "11px 18px", background: "linear-gradient(135deg,#0c8aa6,#0a4f63)", color: "#fff", borderRadius: 14, fontWeight: 700, fontSize: 14.5, textDecoration: "none", boxShadow: "0 4px 16px -6px rgba(12,138,166,.55)" }}>
+          مشاهده پروفایل
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>
+        </Link>
       </div>
-    </Link>
+    </div>
   );
 }
 
@@ -78,9 +101,9 @@ function HorizontalSlider({ dentists, label }: { dentists: DentistCard[]; label:
     <section style={{ maxWidth: 1280, margin: "0 auto", padding: "32px 16px 8px" }}>
       <h2 style={{ margin: "0 0 18px", fontSize: "clamp(20px,2.6vw,28px)", fontWeight: 800, color: "#133b48" }}>{label}</h2>
       <div style={{ display: "flex", gap: 18, overflowX: "auto", paddingBottom: 12, scrollbarWidth: "none" }}>
-        {dentists.map(d => (
-          <div key={d.id} style={{ minWidth: "clamp(260px,28vw,320px)", flexShrink: 0 }}>
-            <DentistCardEl d={d} />
+        {dentists.map((d, i) => (
+          <div key={d.id} style={{ minWidth: "clamp(260px,28vw,310px)", flexShrink: 0 }}>
+            <DentistCardEl d={d} idx={i} />
           </div>
         ))}
       </div>
@@ -215,8 +238,8 @@ export default async function DentistsListPage() {
               </h2>
               <Link href={`/${loc.slug}`} style={{ color: "#0c8aa6", fontWeight: 700, fontSize: 13.5, textDecoration: "none" }}>مشاهده همه ←</Link>
             </div>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(290px, 1fr))", gap: 18 }}>
-              {locDentists.map(d => <DentistCardEl key={d.id} d={d} />)}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 20 }}>
+              {locDentists.map((d, i) => <DentistCardEl key={d.id} d={d} idx={i} />)}
             </div>
           </section>
         );
