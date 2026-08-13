@@ -281,6 +281,15 @@ model Appointment {
   trackCode    String            @unique
   isRead       Boolean           @default(false)
   createdAt    DateTime          @default(now())
+
+  // "YYYY-MM-DD HH:mm" while the appointment is CONFIRMED, NULL once cancelled.
+  // Postgres treats NULLs as distinct, so the unique index below makes the
+  // database reject a double booking of a live slot while still letting any
+  // number of cancelled rows stay around as history.
+  // Keep in sync with `status` — see src/lib/appointments.ts.
+  activeSlot   String?
+
+  @@unique([dentistId, activeSlot])
 }
 
 enum AppointmentStatus {

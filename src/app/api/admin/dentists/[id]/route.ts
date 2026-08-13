@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAdminSession } from "@/lib/auth";
+import { slugConflictMessage } from "@/lib/slug";
+import { pingIndexNow } from "@/lib/indexnow";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getAdminSession();
@@ -13,8 +15,13 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   // Only update what's in the body
   const data: Record<string, unknown> = {};
 
+  if ("slug" in body) {
+    const conflict = await slugConflictMessage(String(body.slug), { owner: "dentist", id: dentistId });
+    if (conflict) return NextResponse.json({ error: conflict }, { status: 409 });
+    data.slug = String(body.slug).trim();
+  }
+
   if ("title" in body) data.title = body.title;
-  if ("slug" in body) data.slug = body.slug;
   if ("shortDesc" in body) data.shortDesc = (body.shortDesc as string) || null;
   if ("longDesc" in body) data.longDesc = (body.longDesc as string) || null;
   if ("address" in body) data.address = (body.address as string) || null;
@@ -58,6 +65,9 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       });
     }
   }
+
+  const saved = await prisma.dentist.findUnique({ where: { id: dentistId }, select: { slug: true } });
+  if (saved) await pingIndexNow([saved.slug]);
 
   return NextResponse.json({ ok: true });
 }

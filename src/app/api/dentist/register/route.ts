@@ -1,9 +1,18 @@
 import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
+    const limited = rateLimit(`dentist-register:${clientIp(req)}`, { limit: 5, windowMs: 60 * 60_000 });
+    if (!limited.ok) {
+      return NextResponse.json(
+        { error: "تعداد درخواست‌های ثبت‌نام زیاد است. کمی بعد دوباره تلاش کنید." },
+        { status: 429, headers: { "Retry-After": String(limited.retryAfterSeconds) } },
+      );
+    }
+
     const { email, password, name, phone } = await req.json() as {
       email: string; password: string; name: string; phone?: string;
     };

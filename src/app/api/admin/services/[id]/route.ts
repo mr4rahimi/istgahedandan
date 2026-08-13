@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAdminSession } from "@/lib/auth";
+import { slugConflictMessage } from "@/lib/slug";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getAdminSession();
@@ -21,8 +22,14 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const { id } = await params;
   const body = await req.json() as Record<string, unknown>;
   const data: Record<string, unknown> = {};
+  if ("slug" in body) {
+    const conflict = await slugConflictMessage(String(body.slug), { owner: "service", id: parseInt(id) });
+    if (conflict) return NextResponse.json({ error: conflict }, { status: 409 });
+  }
+
   const fields = ["title", "slug", "shortDesc", "content", "featuredImage", "bgGradient", "iconSvgPath", "order", "metaTitle", "metaDescription"];
   for (const f of fields) if (f in body) data[f] = body[f] ?? null;
+  if (data.slug) data.slug = String(data.slug).trim();
   if ("infoItems" in body) data.infoItems = body.infoItems ?? undefined;
 
   const service = await prisma.service.update({ where: { id: parseInt(id) }, data });

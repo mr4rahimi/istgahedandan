@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import LiveSearch from "@/components/LiveSearch";
 
 export default function MobileNav() {
   const [isMobile, setIsMobile] = useState(false);
@@ -24,6 +25,7 @@ export default function MobileNav() {
     : pathname.startsWith("/dentists-list") ? "dentists"
     : pathname.startsWith("/map") ? "map"
     : pathname.startsWith("/mag") ? "blog"
+    : pathname.startsWith("/contact") ? "contact"
     : "";
 
   const mk = (key: string) => ({
@@ -55,7 +57,7 @@ export default function MobileNav() {
           <span style={{ fontSize: 11, fontWeight: 600 }}>نقشه</span>
         </Link>
 
-        <Link href="#reserve" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, textDecoration: "none", flex: 1, marginTop: -26 }}>
+        <Link href="/reserve" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 6, textDecoration: "none", flex: 1, marginTop: -26 }}>
           <span style={{ width: 56, height: 56, borderRadius: 18, background: "linear-gradient(135deg,#17bcd6,#0a6f9e)", display: "grid", placeItems: "center", color: "#fff", boxShadow: "0 12px 24px -8px rgba(13,120,168,.75)", border: "4px solid #fff" }}>
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><rect x="3" y="5" width="18" height="16" rx="2.5" /><line x1="3" y1="9.5" x2="21" y2="9.5" /><line x1="8" y1="3" x2="8" y2="6" /><line x1="16" y1="3" x2="16" y2="6" /><line x1="12" y1="13" x2="12" y2="17" /><line x1="10" y1="15" x2="14" y2="15" /></svg>
           </span>
@@ -78,12 +80,13 @@ export default function MobileNav() {
         <div style={{ position: "fixed", inset: 0, zIndex: 1400, direction: "rtl", fontFamily: "inherit" }}>
           <div onClick={() => setSearchOpen(false)} style={{ position: "absolute", inset: 0, background: "rgba(15,45,55,.55)", backdropFilter: "blur(3px)" }} />
           <div style={{ position: "absolute", top: 0, left: 0, right: 0, background: "#fff", padding: "18px 16px calc(18px + env(safe-area-inset-bottom))", boxShadow: "0 8px 30px rgba(0,0,0,.2)", borderRadius: "0 0 22px 22px" }}>
-            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-              <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 10, background: "#f1f8fa", border: "1px solid #dceaef", borderRadius: 14, padding: "13px 15px" }}>
-                <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#0c8aa6" strokeWidth="2.2" strokeLinecap="round"><circle cx="11" cy="11" r="7" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>
-                <input autoFocus placeholder="جستجوی دندانپزشک یا خدمات…" style={{ flex: 1, border: "none", outline: "none", background: "transparent", fontFamily: "inherit", fontSize: 15, color: "#133b48" }} />
-              </div>
-              <button onClick={() => setSearchOpen(false)} style={{ border: "none", background: "#133b48", color: "#fff", fontFamily: "inherit", fontWeight: 600, fontSize: 14, padding: "0 16px", borderRadius: 14, cursor: "pointer", height: 48 }}>بستن</button>
+            <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
+              <LiveSearch
+                placeholder="جستجوی دندانپزشک، خدمات یا منطقه…"
+                autoFocus
+                onNavigate={() => setSearchOpen(false)}
+              />
+              <button onClick={() => setSearchOpen(false)} style={{ border: "none", background: "#133b48", color: "#fff", fontFamily: "inherit", fontWeight: 600, fontSize: 14, padding: "0 16px", borderRadius: 14, cursor: "pointer", height: 48, flexShrink: 0 }}>بستن</button>
             </div>
           </div>
         </div>

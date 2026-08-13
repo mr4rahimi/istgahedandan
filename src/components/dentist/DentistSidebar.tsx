@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import { useState } from "react";
+import { clearDentistSessionCache } from "@/lib/use-dentist-session";
 
 const NAV = [
   { href: "/dentist/dashboard", label: "داشبورد", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
@@ -23,6 +24,7 @@ export default function DentistSidebar({ user }: { user: { name: string; email: 
   const handleLogout = async () => {
     setLoggingOut(true);
     await fetch("/api/dentist/logout", { method: "POST" });
+    clearDentistSessionCache();
     router.push("/dentist/login");
   };
 
@@ -38,7 +40,9 @@ export default function DentistSidebar({ user }: { user: { name: string; email: 
         )}
         <button onClick={() => setCollapsed(v => !v)} style={{ border: "none", background: "#f1f6f8", borderRadius: 8, width: 32, height: 32, display: "grid", placeItems: "center", cursor: "pointer", flexShrink: 0 }}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#4a6b7a" strokeWidth="2.2" strokeLinecap="round">
-            {collapsed ? <><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></> : <><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></>}
+            {collapsed
+              ? <><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" /></>
+              : <><polyline points="13 18 19 12 13 6" /><line x1="5" y1="5" x2="5" y2="19" /></>}
           </svg>
         </button>
       </div>

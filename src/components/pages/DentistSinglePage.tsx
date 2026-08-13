@@ -12,7 +12,7 @@ import DentistGallery from "@/components/DentistGallery";
 import DentistVideoSection from "@/components/DentistVideoSection";
 import ReviewReply from "@/components/ReviewReply";
 import { toJalali, getInitial, gradientFromId } from "@/lib/utils";
-import { dentistSchema, breadcrumbSchema, SITE_URL } from "@/lib/seo";
+import { dentistSchema, breadcrumbSchema, canonicalUrl } from "@/lib/seo";
 import JsonLd from "@/components/JsonLd";
 
 export default async function DentistSinglePage({ slug }: { slug: string }) {
@@ -137,10 +137,10 @@ export default async function DentistSinglePage({ slug }: { slug: string }) {
   });
 
   const breadcrumb = breadcrumbSchema([
-    { name: "خانه", url: SITE_URL },
-    { name: "دندانپزشکان", url: `${SITE_URL}/dentists-list` },
-    ...(locationTitle ? [{ name: locationTitle, url: `${SITE_URL}/${primaryLocation?.slug}` }] : []),
-    { name: dentist.title, url: `${SITE_URL}/${dentist.slug}` },
+    { name: "خانه", url: canonicalUrl() },
+    { name: "دندانپزشکان", url: canonicalUrl("dentists-list") },
+    ...(locationTitle ? [{ name: locationTitle, url: canonicalUrl(primaryLocation?.slug) }] : []),
+    { name: dentist.title, url: canonicalUrl(dentist.slug) },
   ]);
 
   return (

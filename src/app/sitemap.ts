@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://istgahedandan.ir";
+import { canonicalUrl } from "@/lib/seo";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const now = new Date();
@@ -14,38 +14,38 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   ]);
 
   const staticPages: MetadataRoute.Sitemap = [
-    { url: SITE_URL, lastModified: now, changeFrequency: "daily", priority: 1 },
-    { url: `${SITE_URL}/dentists-list`, lastModified: now, changeFrequency: "daily", priority: 0.9 },
-    { url: `${SITE_URL}/services`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${SITE_URL}/map`, lastModified: now, changeFrequency: "weekly", priority: 0.8 },
-    { url: `${SITE_URL}/mag`, lastModified: now, changeFrequency: "daily", priority: 0.7 },
-    { url: `${SITE_URL}/about`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
-    { url: `${SITE_URL}/contact`, lastModified: now, changeFrequency: "monthly", priority: 0.5 },
+    { url: canonicalUrl(), lastModified: now, changeFrequency: "daily", priority: 1 },
+    { url: canonicalUrl("dentists-list"), lastModified: now, changeFrequency: "daily", priority: 0.9 },
+    { url: canonicalUrl("services"), lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: canonicalUrl("map"), lastModified: now, changeFrequency: "weekly", priority: 0.8 },
+    { url: canonicalUrl("mag"), lastModified: now, changeFrequency: "daily", priority: 0.7 },
+    { url: canonicalUrl("about"), lastModified: now, changeFrequency: "monthly", priority: 0.5 },
+    { url: canonicalUrl("contact"), lastModified: now, changeFrequency: "monthly", priority: 0.5 },
   ];
 
   const dentistPages: MetadataRoute.Sitemap = dentists.map(d => ({
-    url: `${SITE_URL}/${d.slug}`,
+    url: canonicalUrl(d.slug),
     lastModified: d.updatedAt,
     changeFrequency: "weekly",
     priority: 0.85,
   }));
 
   const servicePages: MetadataRoute.Sitemap = services.map(s => ({
-    url: `${SITE_URL}/${s.slug}`,
+    url: canonicalUrl(s.slug),
     lastModified: s.updatedAt,
     changeFrequency: "monthly",
     priority: 0.75,
   }));
 
   const blogPages: MetadataRoute.Sitemap = posts.map(p => ({
-    url: `${SITE_URL}/${p.slug}`,
+    url: canonicalUrl(p.slug),
     lastModified: p.updatedAt ?? p.publishedAt ?? now,
     changeFrequency: "monthly",
     priority: 0.65,
   }));
 
   const locationPages: MetadataRoute.Sitemap = locations.map(l => ({
-    url: `${SITE_URL}/${l.slug}`,
+    url: canonicalUrl(l.slug),
     lastModified: l.updatedAt,
     changeFrequency: "weekly",
     priority: 0.7,

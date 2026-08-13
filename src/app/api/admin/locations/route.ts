@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAdminSession } from "@/lib/auth";
+import { slugConflictMessage } from "@/lib/slug";
+import { pingIndexNow } from "@/lib/indexnow";
 
 export async function GET() {
   const session = await getAdminSession();
@@ -20,9 +22,12 @@ export async function POST(req: NextRequest) {
   const body = await req.json() as { slug: string; title: string; shortTitle?: string; parentId?: number | null; order?: number; shortDesc?: string };
   if (!body.slug || !body.title) return NextResponse.json({ error: "slug and title required" }, { status: 400 });
 
+  const conflict = await slugConflictMessage(body.slug);
+  if (conflict) return NextResponse.json({ error: conflict }, { status: 409 });
+
   const location = await prisma.location.create({
     data: {
-      slug: body.slug,
+      slug: body.slug.trim(),
       title: body.title,
       shortTitle: body.shortTitle || null,
       parentId: body.parentId || null,
@@ -30,5 +35,6 @@ export async function POST(req: NextRequest) {
       shortDesc: body.shortDesc || null,
     },
   });
+  await pingIndexNow([location.slug]);
   return NextResponse.json(location);
 }

@@ -27,7 +27,7 @@ async function resolveSlug(slug: string) {
   return null;
 }
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://istgahedandan.ir";
+import { SITE_URL, SITE_NAME, absoluteUrl, canonicalUrl } from "@/lib/seo";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug: rawSlug } = await params;
@@ -41,10 +41,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     authorName?: string | null;
   };
 
-  const title = d.metaTitle || d.title || "ایستگاه دندان";
+  const rawTitle = d.metaTitle || d.title || SITE_NAME;
+  // Most metaTitle values were imported from WordPress with the brand already
+  // appended ("… | ایستگاه دندان"). The root layout adds the same suffix through
+  // its title template, which produced "… | ایستگاه دندان | ایستگاه دندان" on
+  // several hundred pages. `absolute` opts this page out of the template.
+  const title = rawTitle.includes(SITE_NAME) ? { absolute: rawTitle } : rawTitle;
+  // og:title and twitter:title take a plain string, never the template object.
+  const plainTitle = rawTitle;
   const description = d.metaDescription || d.shortDesc || undefined;
-  const image = d.featuredImage || `${SITE_URL}/assets/og-default.jpg`;
-  const canonical = `${SITE_URL}/${slug}`;
+  const image = absoluteUrl(d.featuredImage) || `${SITE_URL}/assets/og-default.jpg`;
+  const canonical = canonicalUrl(slug);
 
   const ogType: "article" | "website" = result.type === "blog" ? "article" : "website";
 
@@ -53,18 +60,18 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description,
     alternates: { canonical },
     openGraph: {
-      title,
+      title: plainTitle,
       description,
       url: canonical,
       type: ogType,
-      images: [{ url: image, width: 1200, height: 630, alt: title }],
+      images: [{ url: image, width: 1200, height: 630, alt: plainTitle }],
       locale: "fa_IR",
       siteName: "ایستگاه دندان",
       ...(result.type === "blog" && d.publishedAt ? { publishedTime: d.publishedAt.toISOString() } : {}),
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: plainTitle,
       description,
       images: [image],
     },

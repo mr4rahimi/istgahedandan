@@ -6,7 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import MobileNav from "@/components/MobileNav";
 import { toJalali, estimateReadTime, getInitial, gradientFromId } from "@/lib/utils";
-import { articleSchema, breadcrumbSchema, SITE_URL } from "@/lib/seo";
+import { articleSchema, breadcrumbSchema, canonicalUrl } from "@/lib/seo";
 import JsonLd from "@/components/JsonLd";
 
 const articleBgs = [
@@ -48,10 +48,10 @@ export default async function BlogSinglePage({ slug }: { slug: string }) {
       categoryName: post.category?.name,
     }),
     breadcrumbSchema([
-      { name: "خانه", url: SITE_URL },
-      { name: "مقالات", url: `${SITE_URL}/mag` },
-      ...(post.category ? [{ name: post.category.name, url: `${SITE_URL}/mag` }] : []),
-      { name: post.title, url: `${SITE_URL}/${post.slug}` },
+      { name: "خانه", url: canonicalUrl() },
+      { name: "مقالات", url: canonicalUrl("mag") },
+      ...(post.category ? [{ name: post.category.name, url: canonicalUrl("mag") }] : []),
+      { name: post.title, url: canonicalUrl(post.slug) },
     ]),
   ];
 

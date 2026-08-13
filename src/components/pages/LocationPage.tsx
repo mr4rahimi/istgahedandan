@@ -8,6 +8,8 @@ import MobileNav from "@/components/MobileNav";
 import { gradientFromId } from "@/lib/utils";
 import DentistInfiniteGrid from "@/components/DentistInfiniteGrid";
 import DragScroll from "@/components/DragScroll";
+import JsonLd from "@/components/JsonLd";
+import { locationSchema, breadcrumbSchema, canonicalUrl } from "@/lib/seo";
 
 const TAKE_FIRST = 12;
 
@@ -66,7 +68,8 @@ export default async function LocationPage({ slug }: { slug: string }) {
     firstPageIds.length > 0
       ? prisma.dentist.findMany({
           where: { id: { in: firstPageIds }, status: "PUBLISHED" },
-          select: { id: true, slug: true, title: true, shortDesc: true, address: true, featuredImage: true },
+          // mapLat/mapLng feed the geo coordinates of the ItemList schema below.
+          select: { id: true, slug: true, title: true, shortDesc: true, address: true, featuredImage: true, mapLat: true, mapLng: true },
           orderBy: [{ order: "asc" }, { id: "asc" }],
         })
       : [],
@@ -93,7 +96,7 @@ export default async function LocationPage({ slug }: { slug: string }) {
   });
 
   // Featured dentists (admin-selected, from this location only)
-  type DentistRow = { id: number; slug: string; title: string; shortDesc: string | null; address: string | null; featuredImage: string | null };
+  type DentistRow = { id: number; slug: string; title: string; shortDesc: string | null; address: string | null; featuredImage: string | null; mapLat: number | null; mapLng: number | null };
   const featuredIds: number[] = featuredSetting ? JSON.parse(featuredSetting.value) : [];
   const featuredDentists: DentistRow[] = featuredIds
     .map(id => firstDentists.find(d => d.id === id) ?? null)
@@ -103,13 +106,31 @@ export default async function LocationPage({ slug }: { slug: string }) {
   if (missingFeaturedIds.length > 0) {
     const extra = await prisma.dentist.findMany({
       where: { id: { in: missingFeaturedIds }, status: "PUBLISHED" },
-      select: { id: true, slug: true, title: true, shortDesc: true, address: true, featuredImage: true },
+      select: { id: true, slug: true, title: true, shortDesc: true, address: true, featuredImage: true, mapLat: true, mapLng: true },
     });
     featuredDentists.push(...extra);
   }
 
+  const parent = location.parentId ? locationMap.get(location.parentId) : undefined;
+
+  const schemas = [
+    ...locationSchema({
+      slug: location.slug,
+      title: location.title,
+      shortDesc: location.shortDesc,
+      parentTitle: parent?.title ?? null,
+      dentists: firstDentists,
+      faqs: faqs.map(f => ({ question: f.question, answer: f.answer })),
+    }),
+    breadcrumbSchema([
+      { name: "خانه", url: canonicalUrl() },
+      ...breadcrumb.map(b => ({ name: b.label, url: canonicalUrl(b.slug) })),
+    ]),
+  ];
+
   return (
     <div style={{ direction: "rtl", fontFamily: "inherit", background: "#f4f9fb", color: "#16313b", minHeight: "100vh", paddingBottom: 80 }}>
+      <JsonLd data={schemas} />
       <Header />
 
       {/* Hero */}

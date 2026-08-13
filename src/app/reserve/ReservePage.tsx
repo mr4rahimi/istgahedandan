@@ -672,9 +672,30 @@ function ReserveInner() {
   );
 }
 
+/**
+ * Rendered into the initial HTML while `ReserveInner` waits on
+ * `useSearchParams()`. Without a fallback the server sent an empty shell, so
+ * `/reserve/` reached crawlers with no `<h1>` and no description at all.
+ * Mirrors the hero of the real page so the swap is not visible.
+ */
+function ReserveHero() {
+  return (
+    <div style={{ direction: "rtl", fontFamily: "inherit", background: "#f4f9fb", minHeight: "100vh" }}>
+      <section style={{ background: "linear-gradient(135deg,#0e4d63,#0a2f3e)", color: "#fff" }}>
+        <div style={{ maxWidth: 1080, margin: "0 auto", padding: "40px 20px 36px" }}>
+          <h1 style={{ margin: "0 0 10px", fontSize: "clamp(26px,4vw,40px)", fontWeight: 800 }}>رزرو آنلاین نوبت</h1>
+          <p style={{ margin: 0, maxWidth: 560, fontSize: 15.5, lineHeight: 1.95, color: "#c4dde4" }}>
+            روز و ساعت مناسب خود را انتخاب کنید و در کمتر از یک دقیقه نوبت ثبت کنید.
+          </p>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 export default function ReservePage() {
   return (
-    <Suspense>
+    <Suspense fallback={<ReserveHero />}>
       <ReserveInner />
     </Suspense>
   );

@@ -8,7 +8,12 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
   if (!appt) return NextResponse.json({ error: "نوبت یافت نشد" }, { status: 404 });
   if (appt.status === "CANCELLED") return NextResponse.json({ error: "این نوبت قبلاً لغو شده" }, { status: 400 });
 
-  await prisma.appointment.update({ where: { trackCode }, data: { status: "CANCELLED" } });
+  // activeSlot must be cleared alongside the status so the slot frees up for
+  // the unique index on (dentistId, activeSlot).
+  await prisma.appointment.update({
+    where: { trackCode },
+    data: { status: "CANCELLED", activeSlot: null },
+  });
 
   return NextResponse.json({ ok: true });
 }

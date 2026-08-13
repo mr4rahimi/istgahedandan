@@ -6,7 +6,7 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import MobileNav from "@/components/MobileNav";
 import ServiceDentists from "./ServiceDentists";
-import { serviceSchema, breadcrumbSchema, SITE_URL } from "@/lib/seo";
+import { serviceSchema, breadcrumbSchema, canonicalUrl } from "@/lib/seo";
 import JsonLd from "@/components/JsonLd";
 
 const FALLBACK_GRADIENTS = [
@@ -48,9 +48,9 @@ export default async function ServiceSinglePage({ slug }: { slug: string }) {
       faqs: faqs.map(f => ({ question: f.question, answer: f.answer })),
     }),
     breadcrumbSchema([
-      { name: "خانه", url: SITE_URL },
-      { name: "خدمات", url: `${SITE_URL}/services` },
-      { name: service.title, url: `${SITE_URL}/${service.slug}` },
+      { name: "خانه", url: canonicalUrl() },
+      { name: "خدمات", url: canonicalUrl("services") },
+      { name: service.title, url: canonicalUrl(service.slug) },
     ]),
   ];
 

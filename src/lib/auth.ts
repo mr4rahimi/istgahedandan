@@ -1,8 +1,9 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { jwtSecret, ADMIN_ROLE } from "@/lib/jwt-secret";
 
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "istgah-dandan-admin-secret-2024");
 export const COOKIE_NAME = "admin_token";
+export { ADMIN_ROLE };
 
 export interface AdminPayload {
   id: number;
@@ -11,15 +12,18 @@ export interface AdminPayload {
 }
 
 export async function signToken(payload: AdminPayload): Promise<string> {
-  return new SignJWT(payload as unknown as Record<string, unknown>)
+  return new SignJWT({ ...payload, role: ADMIN_ROLE })
     .setProtectedHeader({ alg: "HS256" })
     .setExpirationTime("7d")
-    .sign(SECRET);
+    .sign(jwtSecret());
 }
 
 export async function verifyToken(token: string): Promise<AdminPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, SECRET);
+    const { payload } = await jwtVerify(token, jwtSecret());
+    // The dentist tokens are signed with the same key, so a valid signature is
+    // not enough — the role claim is what separates the two.
+    if (payload.role !== ADMIN_ROLE) return null;
     return payload as unknown as AdminPayload;
   } catch {
     return null;

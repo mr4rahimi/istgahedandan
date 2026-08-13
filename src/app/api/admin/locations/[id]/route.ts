@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAdminSession } from "@/lib/auth";
+import { slugConflictMessage } from "@/lib/slug";
 
 export async function GET(_req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await getAdminSession();
@@ -32,7 +33,11 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   if ("title" in body) data.title = body.title;
   if ("shortTitle" in body) data.shortTitle = body.shortTitle || null;
-  if ("slug" in body) data.slug = body.slug;
+  if ("slug" in body) {
+    const conflict = await slugConflictMessage(String(body.slug), { owner: "location", id: locationId });
+    if (conflict) return NextResponse.json({ error: conflict }, { status: 409 });
+    data.slug = String(body.slug).trim();
+  }
   if ("parentId" in body) data.parentId = body.parentId ?? null;
   if ("order" in body) data.order = Number(body.order);
   if ("shortDesc" in body) data.shortDesc = body.shortDesc || null;

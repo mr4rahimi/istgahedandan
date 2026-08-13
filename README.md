@@ -1,36 +1,40 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ایستگاه دندان
 
-## Getting Started
+دایرکتوری و مرجع آنلاین دندانپزشکان و کلینیک‌های دندانپزشکی ایران — [istgahedandan.ir](https://istgahedandan.ir)
 
-First, run the development server:
+ساخته‌شده با Next.js 16 (App Router)، React 19، Prisma 7 و PostgreSQL. کاملاً فارسی و RTL.
+
+## راه‌اندازی
 
 ```bash
+cp .env.example .env             # DATABASE_URL و JWT_SECRET را پر کنید
+docker compose up -d             # PostgreSQL روی پورت 5436
+npx prisma migrate deploy
+npx tsx scripts/seed.ts          # داده اولیه
+npx tsx scripts/create-admin.ts  # ساخت کاربر ادمین
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+سایت روی <http://localhost:3000> بالا می‌آید.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## دستورات
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| دستور | کار |
+|---|---|
+| `npm run dev` | سرور توسعه |
+| `npm run build` | build پروداکشن |
+| `npm run start` | اجرای build |
+| `npm run lint` | ESLint |
+| `npx tsc --noEmit` | بررسی تایپ |
 
-## Learn More
+## مستندات
 
-To learn more about Next.js, take a look at the following resources:
+راهنمای کامل پروژه در پوشهٔ [`docs/`](./docs/) است:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- [`docs/01-overview.md`](./docs/01-overview.md) — پروژه چیست، استک، راه‌اندازی، قواعد کدنویسی
+- [`docs/02-architecture.md`](./docs/02-architecture.md) — مسیریابی، مدل داده، احراز هویت، جریان رزرو نوبت، فهرست API
+- [`docs/03-issues.md`](./docs/03-issues.md) — ایرادات شناخته‌شده و بدهی فنی
+- [`docs/04-changelog.md`](./docs/04-changelog.md) — تاریخچهٔ کارها
+- [`docs/05-deploy.md`](./docs/05-deploy.md) — راهنمای دیپلوی
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+> ⚠️ این نسخهٔ Next.js با نسخه‌های قدیمی‌تر تفاوت‌های شکننده دارد. پیش از نوشتن کد، راهنمای مربوطه را از `node_modules/next/dist/docs/` بخوانید.

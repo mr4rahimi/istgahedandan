@@ -13,7 +13,12 @@ export default function HomeSearch({ locations }: { locations: Location[] }) {
 
   return (
     <div style={{ background: "#fff", border: "1px solid #e4eef2", borderRadius: 22, padding: "26px 28px", boxShadow: "0 16px 40px -24px rgba(13,75,107,.3)" }}>
-      <h2 style={{ margin: "0 0 16px", fontSize: 18, fontWeight: 700, color: "#133b48" }}>جستجوی دندانپزشک</h2>
+      {/* The page-level <h1>. The slider above rotates through three headings,
+          so those stay <h2> — a rotating banner is a poor page title, and the
+          home page had no <h1> at all before this. */}
+      <h1 style={{ margin: "0 0 16px", fontSize: 18, fontWeight: 700, color: "#133b48" }}>
+        جستجوی دندانپزشک و کلینیک دندانپزشکی در سراسر ایران
+      </h1>
 
       <div style={{ display: "flex", gap: 10, flexWrap: "wrap", marginBottom: 14 }}>
         <LiveSearch placeholder="نام دندانپزشک، کلینیک یا خدمت…" />

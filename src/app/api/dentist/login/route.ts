@@ -2,9 +2,18 @@ import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/prisma";
 import { signDentistToken, DENTIST_COOKIE } from "@/lib/dentist-auth";
+import { rateLimit, clientIp } from "@/lib/rate-limit";
 
 export async function POST(req: NextRequest) {
   try {
+    const limited = rateLimit(`dentist-login:${clientIp(req)}`, { limit: 10, windowMs: 10 * 60_000 });
+    if (!limited.ok) {
+      return NextResponse.json(
+        { error: "تلاش‌های ناموفق زیاد بوده است. چند دقیقه بعد دوباره تلاش کنید." },
+        { status: 429, headers: { "Retry-After": String(limited.retryAfterSeconds) } },
+      );
+    }
+
     const { email, password } = await req.json() as { email: string; password: string };
     if (!email || !password) {
       return NextResponse.json({ error: "اطلاعات ناقص" }, { status: 400 });

@@ -1,20 +1,42 @@
 import Link from "next/link";
 import Image from "next/image";
 import { prisma } from "@/lib/prisma";
+import DentistPanelLink from "@/components/DentistPanelLink";
+import { toPersian } from "@/lib/utils";
+import * as jalaali from "jalaali-js";
+
+function currentJalaliYear() {
+  const now = new Date();
+  return jalaali.toJalaali(now.getFullYear(), now.getMonth() + 1, now.getDate()).jy;
+}
+
+// Policy pages the bottom bar links to. They live in StaticPage and may not
+// exist yet, so the links are rendered from what the database actually has
+// rather than hard-coded — previously both pointed at slugs with no record
+// behind them and returned 404.
+const POLICY_SLUGS = ["قوانین-و-مقررات", "حریم-خصوصی"];
 
 async function getFooterData() {
-  const [services, dentists, settings] = await Promise.all([
+  const [services, dentists, settings, policyPages] = await Promise.all([
     prisma.service.findMany({ take: 6, select: { slug: true, title: true } }),
     prisma.dentist.findMany({ take: 5, select: { slug: true, title: true }, orderBy: { createdAt: "desc" } }),
     prisma.setting.findMany({ where: { key: { in: ["contact_phone", "contact_address", "social_instagram", "social_telegram"] } } }),
+    prisma.staticPage.findMany({
+      where: { slug: { in: POLICY_SLUGS } },
+      select: { slug: true, title: true },
+    }),
   ]);
   const s: Record<string, string> = {};
   settings.forEach(st => { s[st.key] = st.value; });
-  return { services, dentists, settings: s };
+  // Preserve the intended order regardless of what the query returns.
+  const ordered = POLICY_SLUGS
+    .map(slug => policyPages.find(p => p.slug === slug))
+    .filter((p): p is { slug: string; title: string } => Boolean(p));
+  return { services, dentists, settings: s, policyPages: ordered };
 }
 
 export default async function Footer() {
-  const { services, dentists, settings } = await getFooterData();
+  const { services, dentists, settings, policyPages } = await getFooterData();
 
   return (
     <footer style={{ direction: "rtl", fontFamily: "inherit", background: "linear-gradient(180deg,#0e4151,#0a2c39)", color: "#cfe4ea", position: "relative", overflow: "hidden" }}>
@@ -87,16 +109,27 @@ export default async function Footer() {
             </ul>
           </div>
 
+          <div style={{ flex: "1 1 200px", minWidth: 190 }}>
+            <h4 style={{ color: "#fff", fontSize: 16, fontWeight: 700, margin: "0 0 18px" }}>ویژه دندانپزشکان</h4>
+            <p style={{ fontSize: 13.5, lineHeight: 1.9, color: "#9fc2cc", margin: "0 0 16px" }}>
+              مطب یا کلینیک خود را در ایستگاه دندان ثبت کنید و نوبت‌های آنلاین، استوری‌ها و مقالات خود را از پنل اختصاصی مدیریت کنید.
+            </p>
+            <DentistPanelLink variant="footer" />
+          </div>
+
         </div>
       </div>
 
       <div style={{ borderTop: "1px solid rgba(255,255,255,.08)", position: "relative" }}>
         <div style={{ maxWidth: 1280, margin: "0 auto", padding: "20px 24px", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
-          <p style={{ margin: 0, fontSize: 13, color: "#82a8b3" }}>کلیه حقوق این وب‌سایت متعلق به <strong style={{ color: "#cfe4ea", fontWeight: 600 }}>ایستگاه دندان</strong> می‌باشد. © ۱۴۰۴</p>
-          <div style={{ display: "flex", gap: 20 }}>
-            <Link href="/قوانین-و-مقررات" style={{ color: "#82a8b3", textDecoration: "none", fontSize: 13 }}>قوانین و مقررات</Link>
-            <Link href="/حریم-خصوصی" style={{ color: "#82a8b3", textDecoration: "none", fontSize: 13 }}>حریم خصوصی</Link>
-          </div>
+          <p style={{ margin: 0, fontSize: 13, color: "#82a8b3" }}>کلیه حقوق این وب‌سایت متعلق به <strong style={{ color: "#cfe4ea", fontWeight: 600 }}>ایستگاه دندان</strong> می‌باشد. © {toPersian(currentJalaliYear())}</p>
+          {policyPages.length > 0 && (
+            <div style={{ display: "flex", gap: 20 }}>
+              {policyPages.map(p => (
+                <Link key={p.slug} href={`/${p.slug}`} style={{ color: "#82a8b3", textDecoration: "none", fontSize: 13 }}>{p.title}</Link>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </footer>

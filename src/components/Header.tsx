@@ -3,8 +3,9 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import LiveSearch from "@/components/LiveSearch";
+import DentistPanelLink from "@/components/DentistPanelLink";
 
 const NAV_LINKS = [
   { key: "home", label: "ایستگاه دندان", href: "/" },
@@ -17,7 +18,6 @@ const NAV_LINKS = [
 
 export default function Header() {
   const pathname = usePathname();
-  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -78,6 +78,7 @@ export default function Header() {
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6" /><line x1="8" y1="2" x2="8" y2="18" /><line x1="16" y1="6" x2="16" y2="22" /></svg>
                 نقشه
               </Link>
+              <DentistPanelLink variant="header" />
               <Link href="/reserve" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "linear-gradient(135deg,#15b8d1,#0a6f9e)", color: "#fff", textDecoration: "none", fontWeight: 700, fontSize: 15, padding: "11px 20px", borderRadius: 12, boxShadow: "0 8px 20px -8px rgba(13,120,168,.7)" }}>
                 <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><rect x="3" y="5" width="18" height="16" rx="2.5" /><line x1="3" y1="9.5" x2="21" y2="9.5" /><line x1="8" y1="3" x2="8" y2="6" /><line x1="16" y1="3" x2="16" y2="6" /></svg>
                 رزرو نوبت
@@ -128,6 +129,7 @@ export default function Header() {
               ))}
             </nav>
             <div style={{ padding: "16px 18px 22px", borderTop: "1px solid #eef4f6" }}>
+              <DentistPanelLink variant="drawer" onNavigate={() => setMenuOpen(false)} />
               <Link href="/reserve" onClick={() => setMenuOpen(false)} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 8, background: "linear-gradient(135deg,#15b8d1,#0a6f9e)", color: "#fff", textDecoration: "none", fontWeight: 700, fontSize: 16, padding: 15, borderRadius: 14, boxShadow: "0 10px 22px -8px rgba(13,120,168,.7)" }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round"><rect x="3" y="5" width="18" height="16" rx="2.5" /><line x1="3" y1="9.5" x2="21" y2="9.5" /><line x1="8" y1="3" x2="8" y2="6" /><line x1="16" y1="3" x2="16" y2="6" /></svg>
                 رزرو نوبت

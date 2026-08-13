@@ -1,8 +1,9 @@
 import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
+import { jwtSecret, DENTIST_ROLE } from "@/lib/jwt-secret";
 
-const SECRET = new TextEncoder().encode(process.env.JWT_SECRET || "istgah-dandan-admin-secret-2024");
 export const DENTIST_COOKIE = "dentist_token";
+export { DENTIST_ROLE };
 
 export interface DentistPayload {
   id: number;
@@ -12,15 +13,17 @@ export interface DentistPayload {
 }
 
 export async function signDentistToken(payload: DentistPayload): Promise<string> {
-  return new SignJWT(payload as unknown as Record<string, unknown>)
+  return new SignJWT({ ...payload, role: DENTIST_ROLE })
     .setProtectedHeader({ alg: "HS256" })
     .setExpirationTime("7d")
-    .sign(SECRET);
+    .sign(jwtSecret());
 }
 
 export async function verifyDentistToken(token: string): Promise<DentistPayload | null> {
   try {
-    const { payload } = await jwtVerify(token, SECRET);
+    const { payload } = await jwtVerify(token, jwtSecret());
+    // The admin tokens are signed with the same key — see verifyToken().
+    if (payload.role !== DENTIST_ROLE) return null;
     return payload as unknown as DentistPayload;
   } catch {
     return null;

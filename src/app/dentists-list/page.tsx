@@ -5,6 +5,8 @@ import type { Metadata } from "next";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import MobileNav from "@/components/MobileNav";
+
+export const dynamic = "force-dynamic";
 import { breadcrumbSchema, SITE_URL } from "@/lib/seo";
 import JsonLd from "@/components/JsonLd";
 

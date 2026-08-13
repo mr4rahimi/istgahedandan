@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getAdminSession } from "@/lib/auth";
+import { slugConflictMessage } from "@/lib/slug";
+import { pingIndexNow } from "@/lib/indexnow";
 
 export async function GET() {
   const session = await getAdminSession();
@@ -18,10 +20,14 @@ export async function POST(req: NextRequest) {
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
   const body = await req.json() as Record<string, unknown>;
+
+  const conflict = await slugConflictMessage(String(body.slug ?? ""));
+  if (conflict) return NextResponse.json({ error: conflict }, { status: 409 });
+
   const service = await prisma.service.create({
     data: {
       title: body.title as string,
-      slug: body.slug as string,
+      slug: String(body.slug).trim(),
       shortDesc: (body.shortDesc as string) || null,
       content: (body.content as string) || null,
       featuredImage: (body.featuredImage as string) || null,
@@ -33,5 +39,6 @@ export async function POST(req: NextRequest) {
       metaDescription: (body.metaDescription as string) || null,
     },
   });
+  await pingIndexNow([service.slug]);
   return NextResponse.json(service);
 }

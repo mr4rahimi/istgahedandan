@@ -8,10 +8,17 @@ export default function DentistReviewForm({ dentistId }: { dentistId: number }) 
   const [name, setName] = useState("");
   const [text, setText] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">("idle");
+  const [hint, setHint] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (rating === 0 || !text.trim()) return;
+    // A star rating is what produces aggregateRating (and the review stars in
+    // search results), so it is required. Say so instead of silently ignoring
+    // the click — the imported WordPress reviews have no ratings precisely
+    // because nothing ever asked for one.
+    if (rating === 0) { setHint("لطفاً امتیاز خود را با ستاره‌ها ثبت کنید."); return; }
+    if (!text.trim()) { setHint("لطفاً متن نظر را بنویسید."); return; }
+    setHint("");
     setStatus("loading");
     try {
       const res = await fetch("/api/reviews", {
@@ -20,7 +27,11 @@ export default function DentistReviewForm({ dentistId }: { dentistId: number }) 
         body: JSON.stringify({ dentistId, rating, name, body: text }),
       });
       if (res.ok) { setStatus("done"); setRating(0); setName(""); setText(""); }
-      else setStatus("error");
+      else {
+        const data = await res.json().catch(() => null);
+        setHint(data?.error || "");
+        setStatus("error");
+      }
     } catch { setStatus("error"); }
   };
 
@@ -42,7 +53,8 @@ export default function DentistReviewForm({ dentistId }: { dentistId: number }) 
           </div>
           <input value={name} onChange={e => setName(e.target.value)} placeholder="نام شما (اختیاری)" style={{ width: "100%", marginBottom: 10, border: "none", borderRadius: 12, padding: "12px 14px", fontFamily: "inherit", fontSize: 14, color: "#143945", background: "#fff", outline: "none", boxSizing: "border-box" }} />
           <textarea value={text} onChange={e => setText(e.target.value)} placeholder="نظر شما درباره این مرکز…" style={{ width: "100%", minHeight: 90, resize: "vertical", border: "none", borderRadius: 13, padding: "14px 16px", fontFamily: "inherit", fontSize: 14, color: "#143945", background: "#fff", outline: "none", boxSizing: "border-box" }} required />
-          {status === "error" && <p style={{ margin: "8px 0 0", color: "#fca5a5", fontSize: 13 }}>خطا در ثبت نظر. لطفاً دوباره تلاش کنید.</p>}
+          {hint && <p style={{ margin: "8px 0 0", color: "#fcd34d", fontSize: 13 }}>{hint}</p>}
+          {status === "error" && !hint && <p style={{ margin: "8px 0 0", color: "#fca5a5", fontSize: 13 }}>خطا در ثبت نظر. لطفاً دوباره تلاش کنید.</p>}
           <button type="submit" disabled={status === "loading"} style={{ marginTop: 14, background: "#fff", color: "#0b5e7a", border: "none", fontFamily: "inherit", fontWeight: 700, fontSize: 15, padding: "13px 28px", borderRadius: 13, cursor: "pointer", opacity: status === "loading" ? .7 : 1 }}>
             {status === "loading" ? "در حال ثبت…" : "ثبت دیدگاه"}
           </button>

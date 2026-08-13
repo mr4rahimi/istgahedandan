@@ -5,6 +5,9 @@ import Footer from "@/components/Footer";
 import MobileNav from "@/components/MobileNav";
 import type { Metadata } from "next";
 
+// Reads the services list, and <Footer /> reads the database too — see app/page.tsx.
+export const revalidate = 600;
+
 export const metadata: Metadata = {
   title: "خدمات دندانپزشکی | ایستگاه دندان",
   description: "مجموعه کامل خدمات تخصصی دندانپزشکی که توسط بهترین متخصصان ایستگاه دندان ارائه می‌شود.",

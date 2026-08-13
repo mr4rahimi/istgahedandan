@@ -31,7 +31,8 @@ export const metadata: Metadata = {
     images: ["/assets/og-default.jpg"],
   },
   alternates: {
-    canonical: process.env.NEXT_PUBLIC_SITE_URL || "https://istgahedandan.ir",
+    // Trailing slash to match `trailingSlash: true` — see next.config.ts.
+    canonical: `${process.env.NEXT_PUBLIC_SITE_URL || "https://istgahedandan.ir"}/`,
   },
   robots: {
     index: true,

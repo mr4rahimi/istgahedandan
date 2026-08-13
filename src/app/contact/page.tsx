@@ -1,5 +1,8 @@
 import Link from "next/link";
 import type { Metadata } from "next";
+
+// <Footer /> reads the database (contact settings) — see app/page.tsx.
+export const revalidate = 600;
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import MobileNav from "@/components/MobileNav";

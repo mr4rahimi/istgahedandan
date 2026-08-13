@@ -12,6 +12,11 @@ import { websiteSchema, breadcrumbSchema, SITE_URL } from "@/lib/seo";
 import JsonLd from "@/components/JsonLd";
 import type { Metadata } from "next";
 
+// This page reads the database directly (latest dentists, articles, stories) and
+// so does <Footer />. Without this it is prerendered once at build time and the
+// content stays frozen until the next deploy.
+export const revalidate = 600;
+
 export const metadata: Metadata = {
   title: "ایستگاه دندان | معرفی بهترین دندانپزشکی‌های ایران",
   description: "ایستگاه دندان - معرفی بهترین دندانپزشکی‌ها در سراسر ایران. جستجو بر اساس منطقه، تخصص و امتیاز کاربران.",
