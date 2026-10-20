@@ -28,7 +28,9 @@ src/
 │   ├── appointments.ts       همگام‌سازی activeSlot با وضعیت نوبت
 │   ├── rate-limit.ts         محدودکنندهٔ درخواست برای endpointهای عمومی
 │   ├── slug.ts               چک یکتایی اسلاگ بین پنج جدول
-│   ├── seo.ts                سازندهٔ JSON-LD
+│   ├── seo.ts                JSON-LD، canonicalUrl، متن پیش‌فرض صفحات دندانپزشک، نرمال‌سازی slug قدیمی
+│   ├── dentist-facts.ts      منطقهٔ اصلی، امتیاز و «دندانپزشکی‌های نزدیک» یک مطب
+│   ├── indexnow.ts           ping به Bing/Yandex هنگام ذخیرهٔ محتوا
 │   └── utils.ts              toJalali, toPersian, gradientFromId, …
 └── proxy.ts                  جایگزین middleware در Next 16
 ```
@@ -214,10 +216,12 @@ Next 16 دایرکتوری‌های با نام یونیکد را قابل‌ا�
 - **`inLanguage: "fa-IR"`** — نه `@language` که جزو واژگان Schema.org نیست.
 - **`areaServed` باید شهر واقعی باشد**، نه «کل ایران»؛ کشور فقط fallback است.
 - `locationSchema` برای هر مطب همان `@id` کانونیکال صفحهٔ خودش را می‌گذارد تا نسخهٔ رقیب `LocalBusiness` تعریف نکند.
-- `app/sitemap.ts` نقشهٔ سایت را از دیتابیس می‌سازد (دندانپزشکان `PUBLISHED`، خدمات، مقالات، تا ۲۰۰ منطقه).
+- `app/sitemap.ts` نقشهٔ سایت را از دیتابیس می‌سازد (دندانپزشکان `PUBLISHED`، خدمات، مقالات، تا ۲۰۰ منطقه). **ISR یک‌ساعته** (`revalidate = 3600`) — بدون آن در زمان build منجمد می‌شد. آدرس‌ها با `encodeURI(canonicalUrl(…))` تا با تگ canonical یکی باشند؛ slugهای دارای `/` حذف می‌شوند.
 - `app/robots.ts` هم هست.
-- متادیتای هر صفحه از `metaTitle` / `metaDescription` رکورد می‌آید و اگر خالی بود از `title` / `shortDesc`.
+- متادیتای هر صفحه از `metaTitle` / `metaDescription` رکورد می‌آید و اگر خالی بود از `title` / `shortDesc`. **استثنا — دندانپزشک:** وقتی metaTitle فقط «نام | برند» است یا توضیحات همان متن قالبی وردپرس است (`isBoilerplateDesc`)، عنوان، توضیحات و باکس «درباره» از داده‌های خود مطب ساخته می‌شوند (`dentistTitle` / `dentistMetaDescription` / `dentistSummary`). متنی که کسی واقعاً نوشته همیشه برنده است.
+- **لینک داخلی بخشی از قرارداد SEO است:** صفحهٔ منطقه بالای ۱۲ مطب یک فهرست لینک سادهٔ کامل رندر می‌کند (گرید کارت‌ها با اسکرول بی‌نهایت است و خزنده بقیه را نمی‌بیند)، و صفحهٔ دندانپزشک ۸ مطب نزدیک را لینک می‌دهد. هر فهرستی که بعداً با JS بارگذاری شود باید یک معادل HTML قابل‌خزش داشته باشد. بررسی: `scripts/seo-orphans.py`.
+- **آدرس‌های قدیمی وردپرس:** slugهای غلط‌تایپی در `[slug]/page.tsx` با `normalizeLegacySlug()` به 308 تبدیل می‌شوند؛ آرشیوها (`/blog`، `/author`، `/feed`، `/rahmani`) در `redirects()` در `next.config.ts`.
 
 ## آپلود فایل
 
-آپلودها روی فایل‌سیستم در `public/uploads/` می‌نشینند (`/api/admin/upload` و `/api/dentist/upload`). در `next.config.ts` بهینه‌سازی تصویر با `unoptimized: true` خاموش است.
+آپلودها روی فایل‌سیستم در `public/uploads/` می‌نشینند (`/api/admin/upload` و `/api/dentist/upload`). در `next.config.ts` بهینه‌سازی تصویر با `unoptimized: true` خاموش است — نه از سر سهل‌انگاری: CPU سرور برای sharp کافی نیست ([`03-issues.md#۱۲`](./03-issues.md)).

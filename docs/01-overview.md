@@ -80,6 +80,7 @@ npm run dev
 | `NEXT_PUBLIC_SITE_URL` | مبنای canonical / sitemap / JSON-LD |
 | `NEXT_PUBLIC_SITE_NAME` | نام سایت |
 | `SHADOW_DATABASE_URL` | اختیاری، فقط برای ابزار توسعه: `prisma migrate dev` و بررسی هماهنگی migrationها |
+| `INDEXNOW_KEY` | اختیاری. با ست شدن، تغییرات محتوا به Bing/Yandex/Naver اطلاع داده می‌شود. حداقل ۸ کاراکتر |
 
 `JWT_SECRET` **fallback ندارد** — اگر ست نشده یا کوتاه‌تر از ۳۲ کاراکتر باشد، `src/lib/jwt-secret.ts` در زمان اجرا خطا پرتاب می‌کند. این عمدی است: یک مقدار پیش‌فرض داخل مخزن یعنی یک دیپلوی بدتنظیم با کلیدی عمومی توکن امضا می‌کند. تولید مقدار مناسب: `openssl rand -base64 48`
 

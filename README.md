@@ -36,5 +36,7 @@ npm run dev
 - [`docs/03-issues.md`](./docs/03-issues.md) — ایرادات شناخته‌شده و بدهی فنی
 - [`docs/04-changelog.md`](./docs/04-changelog.md) — تاریخچهٔ کارها
 - [`docs/05-deploy.md`](./docs/05-deploy.md) — راهنمای دیپلوی
+- [`docs/06-search-console.md`](./docs/06-search-console.md) — وضعیت ایندکس و Search Console (مرداد ۱۴۰۵)
+- [`docs/07-seo-audit-1405-07.md`](./docs/07-seo-audit-1405-07.md) — ممیزی کامل سئو و بازیابی ایندکس (مهر ۱۴۰۵)
 
 > ⚠️ این نسخهٔ Next.js با نسخه‌های قدیمی‌تر تفاوت‌های شکننده دارد. پیش از نوشتن کد، راهنمای مربوطه را از `node_modules/next/dist/docs/` بخوانید.

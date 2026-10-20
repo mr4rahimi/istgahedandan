@@ -6,24 +6,38 @@
 |---|---|
 | آدرس | `185.164.73.224` (دسترسی SSH با کلید، بدون رمز) |
 | دامنه | <https://istgahedandan.ir> |
-| CDN | دامنه به `185.208.173.17` اشاره می‌کند (`WCDN`)، نه مستقیم به سرور |
+| DNS | مستقیم به سرور (`185.164.73.224`). CDN ابرهای (WCDN) در مرداد ۱۴۰۵ خاموش شد — [`06-search-console.md`](./06-search-console.md) |
+| CPU | `Common KVM processor` — **بدون SSE4.2/POPCNT**؛ به همین دلیل `sharp` لود نمی‌شود و بهینه‌سازی تصویر خاموش است ([`03-issues.md#۱۲`](./03-issues.md)) |
 | مسیر اپ | `/var/www/istgahedandan` |
 | پروسه | pm2 با نام `istgahedandan`، دستور `next start --port 3004` |
 | تنظیمات pm2 | `/var/www/istgahedandan/ecosystem.config.json` — **فقط روی سرور است، در repo نیست** |
 | دیتابیس | PostgreSQL محلی سرور، پورت ۵۴۳۲، دیتابیس `istgahedandan_db` |
 | وب‌سرور | nginx، `/etc/nginx/sites-enabled/istgahedandan.ir` |
-| SSL | `/etc/ssl/istgahedandan/` |
+| SSL | Let's Encrypt (certbot، تمدید خودکار): `/etc/letsencrypt/live/istgahedandan.ir/` |
 | Node | v22.15.0 |
-| لاگ‌ها | `/var/log/pm2/istgahedandan-{out,error}.log` |
+| لاگ‌ها | اپ: `/var/log/pm2/istgahedandan-{out,error}.log` · دسترسی nginx (فقط همین سایت، از ۱۴۰۵/۰۷/۲۸): `/var/log/nginx/istgahedandan.access.log` |
+| IndexNow | `INDEXNOW_KEY` در `.env` سرور ست است؛ کلید در `/indexnow-key.txt` سرو می‌شود |
 | پشتیبان‌ها | `/var/backups/istgahedandan/<تاریخ>/` |
 
 > ⚠️ **روی این سرور سایت‌های دیگری هم هستند** (`9dm`، `bartar-crm`، `bartarjanebi`، `mahamprinter`، `modi`، `price-next`، `music_api`). اسکریپت دیپلوی فقط با `/var/www/istgahedandan` و پروسهٔ pm2 هم‌نام کار دارد. هیچ دستوری نباید سراسری اجرا شود.
 
 nginx این مسیرها را مستقیم از دیسک سرو می‌کند: `/uploads/`، `/assets/`، `/_next/static/`. بقیه به پورت ۳۰۰۴ پروکسی می‌شود با `proxy_set_header Host $host`. سقف آپلود ۶۰ مگابایت.
 
-### CDN — نکتهٔ مهم هنگام تست
+### تونل لپ‌تاپ — نکتهٔ مهم هنگام اتصال
 
-چون دامنه پشت CDN است، بعد از دیپلوی ممکن است نسخهٔ کهنه ببینید. برای تست واقعی یا از cache-buster استفاده کنید یا مستقیم سرور را بزنید:
+روی لپ‌تاپ تونل sing-box (`singbox_tun`) روشن است و اتصال به سرور ایرانی از داخل آن کند یا قطع است. همیشه به اینترفیس فیزیکی بچسبانید:
+
+```bash
+ssh -o BindInterface=wlo1 srv …            # در ~/.ssh/config، srv = root@185.164.73.224
+curl --interface wlo1 https://istgahedandan.ir/…
+DEPLOY_IFACE=wlo1 ./scripts/deploy.sh --dry-run
+```
+
+برعکس، APIهای گوگل (Search Console) و GitHub **فقط از داخل تونل** در دسترس‌اند — برای آن‌ها چیزی اضافه نکنید.
+
+### کش — نکتهٔ هنگام تست
+
+CDN دیگر در کار نیست، ولی صفحات ISR خود Next کش می‌شوند. برای تست واقعی یا از cache-buster استفاده کنید یا مستقیم پورت اپ را بزنید:
 
 ```bash
 curl -s "https://istgahedandan.ir/services?cb=$RANDOM" | grep ...
@@ -35,6 +49,7 @@ ssh root@185.164.73.224 'curl -s http://127.0.0.1:3004/services'
 ## اجرای دیپلوی
 
 ```bash
+export DEPLOY_IFACE=wlo1        # وقتی تونل لپ‌تاپ روشن است (تقریباً همیشه)
 ./scripts/deploy.sh --dry-run   # نمایش تغییرات بدون اعمال — همیشه اول این
 ./scripts/deploy.sh             # دیپلوی کامل با تأیید تعاملی
 ./scripts/deploy.sh --yes       # بدون پرسش
