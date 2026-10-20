@@ -163,9 +163,10 @@ export function dentistSchema(d: DentistSchemaInput) {
     image: absoluteUrl(d.featuredImage) ?? SITE_LOGO,
     logo: SITE_LOGO,
     hasMap: `${SITE_URL}/map`,
-    priceRange: "$$",
+    // priceRange / paymentAccepted used to be hard-coded ("$$", "Cash, Card")
+    // for every practice. Nothing in the data backs them, and an invented
+    // claim about a real clinic is worse than an absent optional property.
     currenciesAccepted: "IRR",
-    paymentAccepted: "Cash, Card",
     // The city this practice actually serves. "Iran" as a whole dilutes the
     // local signal for a single clinic; fall back to it only when unknown.
     areaServed: d.locationTitle
