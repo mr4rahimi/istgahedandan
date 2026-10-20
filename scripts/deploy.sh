@@ -28,6 +28,12 @@ BACKUP_ROOT="/var/backups/istgahedandan"
 KEEP_BACKUPS=5
 
 SSH_OPTS=(-o BatchMode=yes -o ConnectTimeout=15)
+# With a VPN/tunnel up on the laptop the server is slow or unreachable through
+# it. Set DEPLOY_IFACE to the physical interface (e.g. DEPLOY_IFACE=wlo1) to
+# pin SSH/rsync to it and go around the tunnel.
+if [ -n "${DEPLOY_IFACE:-}" ]; then
+  SSH_OPTS+=(-o "BindInterface=$DEPLOY_IFACE")
+fi
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # ─── Output helpers ──────────────────────────────────────────────────────────

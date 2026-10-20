@@ -24,6 +24,19 @@ const nextConfig: NextConfig = {
       { pathname: "/assets/**" },
     ],
   },
+  // WordPress archive URLs that Google still requests and that have no
+  // one-to-one counterpart here. Typo'd profile slugs are handled separately in
+  // src/app/[slug]/page.tsx (normalizeLegacySlug).
+  async redirects() {
+    return [
+      { source: "/blog", destination: "/mag/", permanent: true },
+      { source: "/blog/:path*", destination: "/mag/", permanent: true },
+      { source: "/author/:path*", destination: "/mag/", permanent: true },
+      { source: "/feed", destination: "/mag/", permanent: true },
+      { source: "/rahmani", destination: "/", permanent: true },
+      { source: "/rahmani/:path*", destination: "/", permanent: true },
+    ];
+  },
   async rewrites() {
     return [
       { source: "/wp-content/uploads/:path*", destination: "/uploads/:path*" },

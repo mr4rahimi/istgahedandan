@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import type { Metadata } from "next";
 import ServiceSinglePage from "@/components/pages/ServiceSinglePage";
@@ -27,13 +27,30 @@ async function resolveSlug(slug: string) {
   return null;
 }
 
-import { SITE_URL, SITE_NAME, absoluteUrl, canonicalUrl } from "@/lib/seo";
+import {
+  SITE_URL, SITE_NAME, absoluteUrl, canonicalUrl,
+  isBoilerplateDesc, dentistMetaDescription, dentistTitle, normalizeLegacySlug,
+} from "@/lib/seo";
+import { getDentistFacts } from "@/lib/dentist-facts";
+
+/**
+ * A malformed percent-escape in the URL (bots, truncated links) makes
+ * decodeURIComponent throw, which used to surface as a 500. Treat it as a
+ * page that does not exist.
+ */
+function decodeSlug(raw: string): string | null {
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return null;
+  }
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug: rawSlug } = await params;
-  const slug = decodeURIComponent(rawSlug);
-  const result = await resolveSlug(slug);
-  if (!result) return { title: "صفحه یافت نشد" };
+  const slug = decodeSlug(rawSlug);
+  const result = slug ? await resolveSlug(slug) : null;
+  if (!slug || !result) return { title: "صفحه یافت نشد" };
 
   const d = result.data as {
     metaTitle?: string | null; title?: string; metaDescription?: string | null;
@@ -41,7 +58,25 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     authorName?: string | null;
   };
 
-  const rawTitle = d.metaTitle || d.title || SITE_NAME;
+  let rawTitle = d.metaTitle || d.title || SITE_NAME;
+  let description = d.metaDescription || d.shortDesc || undefined;
+
+  // Dentist profiles mostly still carry WordPress defaults: a bare
+  // "name | brand" title and a description shared by 264 profiles. Replace
+  // those — and only those — with copy built from the profile's own facts.
+  if (result.type === "dentist") {
+    const dentist = result.data;
+    // "Default" = the metaTitle adds nothing but a brand suffix to the name
+    // (including misspelt ones such as "| ایستگاه دندن").
+    const defaultTitle = !dentist.metaTitle || dentist.metaTitle.replace(/\s*\|.*$/, "").trim() === dentist.title.trim();
+    const defaultDesc = isBoilerplateDesc(dentist.metaDescription) && isBoilerplateDesc(dentist.shortDesc);
+    if (defaultTitle || defaultDesc) {
+      const facts = await getDentistFacts(dentist);
+      if (defaultTitle) rawTitle = dentistTitle(facts);
+      if (defaultDesc) description = dentistMetaDescription(facts);
+    }
+  }
+
   // Most metaTitle values were imported from WordPress with the brand already
   // appended ("… | ایستگاه دندان"). The root layout adds the same suffix through
   // its title template, which produced "… | ایستگاه دندان | ایستگاه دندان" on
@@ -49,7 +84,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = rawTitle.includes(SITE_NAME) ? { absolute: rawTitle } : rawTitle;
   // og:title and twitter:title take a plain string, never the template object.
   const plainTitle = rawTitle;
-  const description = d.metaDescription || d.shortDesc || undefined;
   const image = absoluteUrl(d.featuredImage) || `${SITE_URL}/assets/og-default.jpg`;
   const canonical = canonicalUrl(slug);
 
@@ -80,9 +114,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function SlugPage({ params }: Props) {
   const { slug: rawSlug } = await params;
-  const slug = decodeURIComponent(rawSlug);
+  const slug = decodeSlug(rawSlug);
+  if (!slug) notFound();
   const result = await resolveSlug(slug);
-  if (!result) notFound();
+  if (!result) {
+    // Old WordPress URLs with typos still sit in Google's index — send them
+    // to the profile they were meant for instead of a 404.
+    const legacy = normalizeLegacySlug(slug);
+    if (legacy && (await resolveSlug(legacy))) permanentRedirect(canonicalUrl(encodeURIComponent(legacy)));
+    notFound();
+  }
 
   if (result.type === "service") return <ServiceSinglePage slug={slug} />;
   if (result.type === "dentist") return <DentistSinglePage slug={slug} />;

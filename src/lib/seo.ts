@@ -26,6 +26,110 @@ export function absoluteUrl(path?: string | null): string | undefined {
   return `${SITE_URL}${path.startsWith("/") ? "" : "/"}${path}`;
 }
 
+// ─── Dentist page copy ────────────────────────────────────────────────────────
+/**
+ * 264 of the 269 dentists carry the same WordPress-era description with only the
+ * name swapped in ("…، اطلاعات تماس، آدرس و لوکیشن دندانپزشکی، ساعت کاری و...
+ * خدماتی شامل ترمیم دندان، ارتودنسی و... را ارائه می‌دهد."). As a meta
+ * description and as the visible "about" paragraph it makes every profile read as
+ * a near-duplicate of the others. When a dentist still has that template, the
+ * page builds its copy from the record's own facts instead; a description the
+ * dentist or an admin actually wrote is always used as-is.
+ */
+export function isBoilerplateDesc(text?: string | null): boolean {
+  if (!text || text.trim().length < 20) return true;
+  return text.includes("اطلاعات تماس، آدرس و لوکیشن");
+}
+
+export interface DentistFacts {
+  title: string;
+  locationTitle?: string | null;
+  address?: string | null;
+  phone?: string | null;
+  avgRating?: number | null;
+  ratingCount?: number;
+  services?: string[];
+}
+
+function clip(text: string, max: number): string {
+  const t = text.replace(/\s+/g, " ").trim();
+  if (t.length <= max) return t;
+  const cut = t.slice(0, max);
+  const lastSpace = cut.lastIndexOf(" ");
+  return `${cut.slice(0, lastSpace > max * 0.6 ? lastSpace : max).replace(/[،,.؛:]+$/, "")}…`;
+}
+
+/** Whether the location name is already part of the practice name. */
+function mentionsLocation(title: string, loc?: string | null): boolean {
+  return !!loc && title.replace(/\u200c/g, " ").includes(loc.replace(/\u200c/g, " "));
+}
+
+/**
+ * `<title>` for a dentist whose metaTitle is still the bare "name | brand"
+ * default. Search demand for these pages is the practice name plus its
+ * neighbourhood or "شماره/تلفن/آدرس", so those go in the title. The root
+ * layout's template appends the brand.
+ */
+export function dentistTitle(f: DentistFacts): string {
+  const where = f.locationTitle && !mentionsLocation(f.title, f.locationTitle) ? ` در ${f.locationTitle}` : "";
+  return `${f.title}${where} | آدرس و تلفن`;
+}
+
+/** Meta description (~155 chars) built from the dentist's own address, phone and rating. */
+export function dentistMetaDescription(f: DentistFacts): string {
+  const MAX = 160;
+  const where = f.locationTitle && !mentionsLocation(f.title, f.locationTitle) ? ` در ${f.locationTitle}` : "";
+  const head = `${f.title}${where}`;
+  const tail = [
+    f.phone ? `تلفن: ${f.phone}` : null,
+    f.avgRating && f.ratingCount ? `امتیاز ${f.avgRating.toFixed(1)} از ${f.ratingCount} نظر` : null,
+  ].filter(Boolean) as string[];
+  // The address is the only open-ended part, so it absorbs whatever room the
+  // fixed parts leave; the closing call to action is added only if it fits.
+  const fixedLen = [head, ...tail].join("؛ ").length + 2;
+  const parts = [head];
+  if (f.address && MAX - fixedLen > 25) parts.push(`آدرس: ${clip(f.address, MAX - fixedLen - 6)}`);
+  parts.push(...tail);
+  const cta = "مسیریابی و ثبت نظر در ایستگاه دندان";
+  const text = parts.join("؛ ");
+  return text.length + cta.length + 2 <= MAX ? `${text}؛ ${cta}` : clip(text, MAX);
+}
+
+/** Visible "about" paragraph that replaces the shared template text. */
+export function dentistSummary(f: DentistFacts): string {
+  const sentences: string[] = [];
+  const where = f.locationTitle && !mentionsLocation(f.title, f.locationTitle) ? ` در منطقهٔ ${f.locationTitle}` : "";
+  sentences.push(`${f.title} یک مرکز دندانپزشکی${where} است.`);
+  if (f.address) sentences.push(`نشانی این مرکز «${f.address.trim()}» است.`);
+  if (f.phone) sentences.push(`برای هماهنگی و گرفتن نوبت می‌توانید با شمارهٔ ${f.phone} تماس بگیرید.`);
+  if (f.services?.length) sentences.push(`خدماتی که در ایستگاه دندان برای این مرکز ثبت شده: ${f.services.join("، ")}.`);
+  if (f.avgRating && f.ratingCount) {
+    sentences.push(`میانگین امتیاز کاربران ${f.avgRating.toFixed(1)} از ۵ بر اساس ${f.ratingCount} نظر است؛ تجربهٔ خود را هم می‌توانید در پایین همین صفحه ثبت کنید.`);
+  }
+  return sentences.join(" ");
+}
+
+// ─── Legacy URLs ──────────────────────────────────────────────────────────────
+/**
+ * Google still holds a few dozen WordPress-era URLs whose slugs were typed with
+ * typos or Arabic letterforms ("دنداپزشکی", "دندنپزشکی", "ك", "ي", a stray ")"),
+ * and they now 404. Normalizing them recovers the matching profile so the old URL
+ * can 308 to it. Returns `null` when normalization changes nothing.
+ */
+export function normalizeLegacySlug(slug: string): string | null {
+  const fixed = slug
+    .replace(/[ك]/g, "ک")
+    .replace(/[يى]/g, "ی")
+    .replace(/[ـ]/g, "")
+    .replace(/دنداپزشک/g, "دندانپزشک")
+    .replace(/دندنپزشک/g, "دندانپزشک")
+    .replace(/دکتر(?=[^\s-])/g, "دکتر-")
+    .replace(/[)(]+$/g, "")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+  return fixed !== slug ? fixed : null;
+}
+
 // ─── Dentist / LocalBusiness ─────────────────────────────────────────────────
 interface DentistSchemaInput {
   slug: string;

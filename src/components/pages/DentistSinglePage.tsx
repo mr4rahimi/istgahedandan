@@ -12,20 +12,22 @@ import DentistGallery from "@/components/DentistGallery";
 import DentistVideoSection from "@/components/DentistVideoSection";
 import ReviewReply from "@/components/ReviewReply";
 import { toJalali, getInitial, gradientFromId } from "@/lib/utils";
-import { dentistSchema, breadcrumbSchema, canonicalUrl } from "@/lib/seo";
+import { dentistSchema, breadcrumbSchema, canonicalUrl, isBoilerplateDesc, dentistSummary } from "@/lib/seo";
+import { getNearbyDentists, pickPrimaryLocation } from "@/lib/dentist-facts";
 import JsonLd from "@/components/JsonLd";
 
 export default async function DentistSinglePage({ slug }: { slug: string }) {
   const dentist = await prisma.dentist.findUnique({ where: { slug } });
   if (!dentist) notFound();
 
-  const [reviews, faqs, dentistLocs, stories, dentistVideos, dentistSvcs] = await Promise.all([
+  const [reviews, faqs, dentistLocs, stories, dentistVideos, dentistSvcs, nearby] = await Promise.all([
     prisma.review.findMany({ where: { dentistId: dentist.id, approved: true, parentId: null }, orderBy: { createdAt: "desc" } }),
     prisma.fAQ.findMany({ where: { dentistId: dentist.id }, orderBy: { order: "asc" } }),
     prisma.dentistLocation.findMany({ where: { dentistId: dentist.id }, select: { locationId: true } }),
     prisma.dentistStory.findMany({ where: { dentistId: dentist.id }, orderBy: { order: "asc" } }),
     prisma.dentistVideo.findMany({ where: { dentistId: dentist.id }, orderBy: { order: "asc" } }),
     prisma.dentistService.findMany({ where: { dentistId: dentist.id }, select: { serviceId: true } }),
+    getNearbyDentists(dentist),
   ]);
 
   // Fetch related records separately (Prisma v7 adapter: no include)
@@ -110,7 +112,7 @@ export default async function DentistSinglePage({ slug }: { slug: string }) {
 
   const phoneList: string[] = Array.isArray(dentist.phones) ? dentist.phones as string[] : [];
 
-  const primaryLocation = locationsData[0];
+  const primaryLocation = pickPrimaryLocation(locationsData, [...locationsData, ...ancestorsData]);
   const locationTitle = primaryLocation?.shortTitle || primaryLocation?.title;
 
   const schemaData = dentistSchema({
@@ -135,6 +137,21 @@ export default async function DentistSinglePage({ slug }: { slug: string }) {
     services: servicesData.map(s => s.title),
     locationTitle,
   });
+
+  // The shared WordPress template text says nothing about this practice, so the
+  // "about" box is rebuilt from the profile's own facts until someone writes a
+  // real description (see isBoilerplateDesc in src/lib/seo.ts).
+  const aboutText = isBoilerplateDesc(dentist.shortDesc)
+    ? dentistSummary({
+        title: dentist.title,
+        locationTitle,
+        address: dentist.address,
+        phone: phoneList[0],
+        avgRating: displayRating,
+        ratingCount: ratedReviews.length,
+        services: servicesData.map(sv => sv.title),
+      })
+    : dentist.shortDesc;
 
   const breadcrumb = breadcrumbSchema([
     { name: "خانه", url: canonicalUrl() },
@@ -324,11 +341,11 @@ export default async function DentistSinglePage({ slug }: { slug: string }) {
       </section>
 
       {/* ABOUT (shortDesc) */}
-      {dentist.shortDesc && (
+      {aboutText && (
         <section style={{ maxWidth: 1280, margin: "0 auto", padding: "0 16px 16px" }}>
           <div style={{ background: "#fff", border: "1px solid #e7f0f3", borderRadius: 22, padding: "clamp(24px,3vw,40px)", boxShadow: "0 16px 40px -32px rgba(13,75,107,.5)" }}>
             <h2 style={{ margin: "0 0 14px", fontSize: "clamp(20px,2.6vw,26px)", fontWeight: 800, color: "#133b48" }}>درباره {dentist.title}</h2>
-            <p style={{ margin: 0, fontSize: 16, color: "#143945", fontWeight: 600, lineHeight: 2 }}>{dentist.shortDesc}</p>
+            <p style={{ margin: 0, fontSize: 16, color: "#143945", fontWeight: 600, lineHeight: 2 }}>{aboutText}</p>
           </div>
         </section>
       )}
@@ -470,6 +487,32 @@ export default async function DentistSinglePage({ slug }: { slug: string }) {
               </details>
             ))}
           </div>
+        </section>
+      )}
+
+      {/* NEARBY — also the main internal-link path between profiles */}
+      {nearby.length > 0 && (
+        <section style={{ maxWidth: 1280, margin: "0 auto", padding: "0 16px 50px" }}>
+          <h2 style={{ margin: "0 0 18px", fontSize: "clamp(20px,2.6vw,26px)", fontWeight: 800, color: "#133b48" }}>
+            دندانپزشکی‌های نزدیک {dentist.title}
+          </h2>
+          <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: 14 }}>
+            {nearby.map(n => (
+              <li key={n.id}>
+                <Link href={`/${n.slug}`} style={{ display: "block", height: "100%", boxSizing: "border-box", textDecoration: "none", background: "#fff", border: "1px solid #e7f0f3", borderRadius: 16, padding: "14px 16px", boxShadow: "0 10px 26px -24px rgba(13,75,107,.5)" }}>
+                  <span style={{ display: "block", fontSize: 15, fontWeight: 700, color: "#143945" }}>{n.title}</span>
+                  {n.address && (
+                    <span style={{ display: "block", marginTop: 4, fontSize: 12.5, lineHeight: 1.7, color: "#7a9faa" }}>
+                      {n.address.slice(0, 60)}{n.address.length > 60 ? "…" : ""}
+                    </span>
+                  )}
+                  <span style={{ display: "block", marginTop: 6, fontSize: 12.5, fontWeight: 600, color: "#0c8aa6" }}>
+                    {n.distanceKm < 1 ? `${Math.round(n.distanceKm * 1000)} متر` : `${n.distanceKm.toFixed(1)} کیلومتر`} فاصله
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 

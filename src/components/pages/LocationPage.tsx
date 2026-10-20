@@ -64,7 +64,7 @@ export default async function LocationPage({ slug }: { slug: string }) {
   const total = uniqueIds.length;
   const firstPageIds = uniqueIds.slice(0, TAKE_FIRST);
 
-  const [firstDentists, faqs, featuredSetting] = await Promise.all([
+  const [firstDentists, faqs, featuredSetting, allDentists] = await Promise.all([
     firstPageIds.length > 0
       ? prisma.dentist.findMany({
           where: { id: { in: firstPageIds }, status: "PUBLISHED" },
@@ -75,6 +75,16 @@ export default async function LocationPage({ slug }: { slug: string }) {
       : [],
     prisma.fAQ.findMany({ where: { locationId: location.id }, orderBy: { order: "asc" } }),
     prisma.setting.findUnique({ where: { key: `loc_${location.id}_featured_ids` } }),
+    // Every practice in the area as a plain link. The card grid only renders its
+    // first page in HTML and loads the rest on scroll, which crawlers never do —
+    // so profiles beyond the first 12 had no crawlable link from their area.
+    total > TAKE_FIRST
+      ? prisma.dentist.findMany({
+          where: { id: { in: uniqueIds }, status: "PUBLISHED" },
+          select: { id: true, slug: true, title: true },
+          orderBy: { title: "asc" },
+        })
+      : Promise.resolve([] as { id: number; slug: string; title: string }[]),
   ]);
 
   // Ratings for first page
@@ -239,6 +249,24 @@ export default async function LocationPage({ slug }: { slug: string }) {
         </h2>
         <DentistInfiniteGrid locationId={location.id} initialDentists={enriched} total={total} />
       </section>
+
+      {/* Full crawlable index of the area */}
+      {allDentists.length > 0 && (
+        <section style={{ maxWidth: 1280, margin: "0 auto", padding: "8px 16px 12px" }}>
+          <div style={{ background: "#fff", border: "1px solid #e7f0f3", borderRadius: 22, padding: "clamp(20px,3vw,32px)", boxShadow: "0 16px 40px -32px rgba(13,75,107,.5)" }}>
+            <h2 style={{ margin: "0 0 14px", fontSize: "clamp(18px,2.2vw,22px)", fontWeight: 800, color: "#133b48" }}>
+              فهرست کامل دندانپزشکی‌های {location.shortTitle || location.title}
+            </h2>
+            <ul style={{ listStyle: "none", margin: 0, padding: 0, display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "8px 18px" }}>
+              {allDentists.filter(d => !d.slug.includes("/")).map(d => (
+                <li key={d.id}>
+                  <Link href={`/${d.slug}`} style={{ color: "#0c8aa6", textDecoration: "none", fontSize: 14, fontWeight: 600, lineHeight: 1.9 }}>{d.title}</Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
 
       {/* Long Description */}
       {location.longDesc && (
