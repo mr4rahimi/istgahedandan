@@ -12,6 +12,11 @@ const nextConfig: NextConfig = {
   trailingSlash: true,
 
   images: {
+    // Must stay on until the server's CPU changes: the VPS exposes a bare
+    // "Common KVM processor" without SSE4.2/POPCNT (x86-64-v2), and sharp's
+    // prebuilt binaries refuse to load on it. With the optimizer on, Next falls
+    // back to piping the original files through Node — slower than nginx
+    // serving them from disk. See docs/03-issues.md #12.
     unoptimized: true,
     remotePatterns: [
       {
